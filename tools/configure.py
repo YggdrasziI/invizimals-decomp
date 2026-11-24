@@ -43,6 +43,10 @@ COMPILER = COMPILER_CONFIG["name"] if COMPILER_CONFIG else None
 CC_LINUX = COMPILER_CONFIG.get("linux") if COMPILER_CONFIG else None
 CC_EXE = COMPILER_CONFIG.get("exe") if COMPILER_CONFIG else None
 CC_FLAGS = (COMPILER_CONFIG["flags"] if COMPILER_CONFIG else "") + " -Iinclude -Isrc"
+# [compiler.dirs."src/<dir>"]: another compiler (linux = ...) and its own complete flags
+# for the sources of a directory, e.g. a library built with another toolchain than the
+# game (notes/COMPILER.md); the deepest matching directory wins
+CC_DIRS = COMPILER_CONFIG.get("dirs", {}) if COMPILER_CONFIG else {}
 
 AS_FLAGS = "-EL -march=mips32r2 -mabi=32 -G0 -no-pad-sections -Iinclude"
 LD_FLAGS = "-EL --no-check-sections"
@@ -124,6 +128,19 @@ def write_target_asm(module: str, unit: str) -> Path | None:
     return out
 
 
+def dir_compiler(source: str) -> dict[str, str] | None:
+    """ninja variables of the [compiler.dirs] entry of a source's directory, if any."""
+    found = [d for d in CC_DIRS if source.startswith(d.rstrip("/") + "/")]
+    if not found:
+        return None
+    d = max(found, key=len)
+    entry = CC_DIRS[d]
+    if "linux" not in entry or "flags" not in entry:
+        sys.exit(f'decomp.toml: [compiler.dirs."{d}"] needs `linux` and `flags`')
+    return {"cc": " ".join(posix(a) for a in project.linux_command(entry["linux"])),
+            "cc_flags": entry["flags"]}
+
+
 def write_objdiff(units: list[dict]) -> None:
     config = {
         "min_version": "2.3.2",
@@ -177,7 +194,8 @@ def main() -> None:
 
     n.rule("as", f"$python {psp}/assemble.py {posix(tool('as'))} $in $out $as_flags",
            description="AS $in")
-    n.rule("cc", f"$python {psp}/compile.py {posix(tool('objcopy'))} $out {posix(cc_command)} -c $cc_flags -o $out $in",
+    n.variable("cc", posix(cc_command))
+    n.rule("cc", f"$python {psp}/compile.py {posix(tool('objcopy'))} $out $cc -c $cc_flags -o $out $in",
            description="CC $in")
     n.rule("bin", f"{tool('objcopy')} -I binary -O elf32-littlemips -B mips $in $out",
            description="BIN $in")
@@ -220,7 +238,8 @@ def main() -> None:
                 if not COMPILER:
                     sys.exit(f"{src}: no [compiler] in decomp.toml")
                 source = src[len(posix(build_dir)) + 1:]
-                n.build(obj, "cc", source, implicit=cc_deps + [posix(binutils_stamp)])
+                n.build(obj, "cc", source, implicit=cc_deps + [posix(binutils_stamp)],
+                        variables=dir_compiler(source))
                 unit = Path(source).with_suffix("").relative_to("src").as_posix()
                 target_asm = write_target_asm(module.name, unit)
                 # A source unit holds matched functions only, so it is always linked from source
