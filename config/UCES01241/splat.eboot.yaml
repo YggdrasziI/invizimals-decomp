@@ -63,6 +63,8 @@ segments:
     align: 4
     subsegments:
       - [0xC0, asm, text]                  # .init .text .fini
+      - [0x18D90, c, unit_00018CD0]        # func_00018CD0 alone (bounds: hypothesis)
+      - [0x18DB0, asm, text_00018CF0]
       - [0x1E3370, asm, scestub]           # .sceStub.text (system imports)
       - [0x1E3E10, rodata, lib]            # .lib.ent*, .lib.stub*, .rodata.sceModuleInfo
       - [0x1E41AC, rodata, sceresident]    # .rodata.sceResident

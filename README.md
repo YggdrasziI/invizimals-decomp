@@ -34,7 +34,7 @@ Progress
 
 | Release | Disc ID | Progress |
 |---|---|---|
-| Invizimals (Europe) | `UCES01241` | not measured yet (no C yet) |
+| Invizimals (Europe) | `UCES01241` | first function in C (32 bytes); no progress card yet |
 | Invizimals (USA) | `UCUS98746` | not measured yet (paused) |
 
 Dependencies

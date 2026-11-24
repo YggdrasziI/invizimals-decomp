@@ -3,12 +3,14 @@
 Bounds of the splat pieces of `config/UCES01241/splat.eboot.yaml` and what proves
 them. A split that builds proves the bytes, not a translation unit.
 
-## Current pieces (all assembly, 2026-11-24)
+## Current pieces (2026-11-24)
 
 | File offset | vram | Piece | Contents |
 |---|---|---|---|
 | 0x0 | | `bin elf_header` | ELF header, program headers |
-| 0xC0 | 0x0 | `asm text` | `.init`, `.text` (0x30-0x1E3294), `.fini` |
+| 0xC0 | 0x0 | `asm text` | `.init`, `.text` from 0x30 |
+| 0x18D90 | 0x18CD0 | `c unit_00018CD0` | `func_00018CD0` only; bounds are the function's own (hypothesis: the translation unit is not known) |
+| 0x18DB0 | 0x18CF0 | `asm text_00018CF0` | rest of `.text` (to 0x1E3294), `.fini` |
 | 0x1E3370 | 0x1E32B0 | `asm scestub` | `.sceStub.text` |
 | 0x1E3E10 | 0x1E3D50 | `rodata lib` | `.lib.ent*`, `.lib.stub*`, `.rodata.sceModuleInfo` |
 | 0x1E41AC | 0x1E40EC | `rodata sceresident` | `.rodata.sceResident` |
