@@ -30,6 +30,9 @@ jobs:
     container: ghcr.io/yggdraszii/invizimals-decomp-build:main
 
     runs-on: ubuntu-latest
+    env:
+      KIT_COMMIT: 754764d14759c58969bfe29cdc9ab5346255b7ee  # Jstar269/LBP-PSP-Decomp
+      PSPDEV_TAG: v20261001  # pspdev release the kit's recorded builds used
     strategy:
       fail-fast: false
       matrix:
@@ -48,11 +51,63 @@ jobs:
       - name: Python packages
         run: pip install -r tools/requirements.txt
 
+      # The compiler of the C units ([compiler] linux of decomp.toml): GCC 4.0.4 built
+      # from GNU sources by the LBP-PSP-Decomp kit (build 4.0.4c, as probe-gcc4.yml),
+      # in $HOME/lbp-gcc4. Its assembler is the Sony binutils 2.14 one of the decomp.me
+      # psp-gcc-1.3.1 archive, a 32-bit program, in $HOME/hst-gcc where the kit's
+      # wrapper runs it. Both are cached; a cache miss builds them (a few minutes).
+      - name: Compiler cache
+        id: gcc4
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/lbp-gcc4
+            ~/hst-gcc
+          key: gcc4-4.0.4c-${{ env.KIT_COMMIT }}-${{ env.PSPDEV_TAG }}
+
+      - name: Compiler runtime
+        run: |
+          dpkg --add-architecture i386
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends libc6:i386 >/dev/null
+
+      - name: Build compiler
+        if: steps.gcc4.outputs.cache-hit != 'true'
+        run: |
+          apt-get install -y -qq --no-install-recommends file build-essential patch bzip2 \
+            gpgv wget libgmp-dev libmpfr-dev bison flex texinfo >/dev/null
+          python tools/psp/download_tool.py compiler psp-gcc-1.3.1 --path "$HOME/hst-gcc/psp-gcc-1.3.1"
+          chmod -R u+x "$HOME/hst-gcc/psp-gcc-1.3.1"
+          git init -q /opt/kit
+          git -C /opt/kit remote add origin https://github.com/Jstar269/LBP-PSP-Decomp.git
+          git -C /opt/kit fetch -q --depth 1 origin "$KIT_COMMIT"
+          git -C /opt/kit checkout -q FETCH_HEAD -- toolchain/gcc4
+          mkdir -p /opt/pspdev
+          wget -q -O /tmp/pspdev.tar.gz \
+            "https://github.com/pspdev/pspdev/releases/download/$PSPDEV_TAG/pspdev-ubuntu-latest-x86_64.tar.gz"
+          tar -xzf /tmp/pspdev.tar.gz -C /opt/pspdev --strip-components=1
+          PSPDEV_BIN=/opt/pspdev/bin LBP_GCC4_DL=/tmp/gcc4-dl LBP_GCC4_WORK=/tmp/gcc4-work \
+            JOBS=$(nproc) sh /opt/kit/toolchain/gcc4/build.sh 4.0.4c
+          # code generation fingerprint against the kit's record (the binaries embed
+          # the install path, so their own hashes differ)
+          JOBS=$(nproc) LBP_GCC4_DL=/tmp/gcc4-dl sh /opt/kit/toolchain/gcc4/check.sh 4.0.4c > /tmp/check.log \
+            || { cat /tmp/check.log; exit 1; }
+          grep -v BINARY_DIFFERS /tmp/check.log
+
       # Absolute image, splat, assemble, link, PRX, SHA-1 check
       - name: Build
         run: |
           python tools/configure.py --version ${{ matrix.version }}
           ninja
+
+      # The compiler still gives the probe functions byte for byte (notes/COMPILER.md)
+      - name: Compiler probe
+        run: |
+          python tools/psp/compiler_probe.py tools/probes/gcc_leaf.c \
+            --cc "$HOME/lbp-gcc4/psp-gcc-4.0.4c/bin/psp-gcc" --version ${{ matrix.version }} -- -O2 -G0 \
+            > /tmp/probe.log || { cat /tmp/probe.log; exit 1; }
+          cat /tmp/probe.log
+          tail -n 1 /tmp/probe.log | awk '{ split($1, n, "/"); exit n[1] != n[2] }'
 
       # objdiff report of the units
       - name: Report
