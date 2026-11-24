@@ -43,10 +43,12 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   `.word` by `tools/psp/vfpu_words.py`.
 - objdiff-cli **v3.8.3** (report, diff).
 - m2c (pinned commit in `tools/requirements.txt`) for a first C draft.
-- Compiler: **not proven**. The `.comment` strings name Sony's GCC 4.0.4 allegrex
-  (psp-2.9.0 and psp-2.7.3), GCC 3.3.6 and PSPDEV GCC 4.0.2; which one built which
-  code, and the flags, are for the probes (`notes/COMPILER.md`). No `[compiler]` in
-  `decomp.toml` until then: the build is all assembly.
+- Compiler: the `.comment` strings name Sony's GCC 4.0.4 allegrex (psp-2.9.0 and
+  psp-2.7.3), GCC 3.3.6 and PSPDEV GCC 4.0.2. Sony's builds are not available; an
+  open-source GCC 4.0.4 rebuilt with the pspdev Allegrex patch and the LBP-PSP-Decomp
+  tuning (`4.0.4c`) at `-O2 -G0` reproduces all twelve probe functions
+  (`notes/COMPILER.md`). It is a Linux program, built in CI only so far; no
+  `[compiler]` in `decomp.toml` yet: the build is all assembly.
 
 ## Build pipeline
 

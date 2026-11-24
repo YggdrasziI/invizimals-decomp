@@ -1,6 +1,9 @@
 # Compiler
 
-Nothing is proven yet. This file collects the evidence; the probes decide.
+Working result (2026-11-24): GCC 4.0.4 with the pspdev Allegrex patch and the
+Allegrex tuning of the LBP-PSP-Decomp build kit (build `4.0.4c`), `-O2 -G0`,
+reproduces all twelve probe functions. It is an open-source rebuild, not Sony's
+`4.0.4+allegrex-2.2.3-psp-2.9.0`; no function is linked from C yet.
 
 ## Evidence in the module
 
@@ -48,3 +51,40 @@ others differ in three ways that GCC 3.3.3 does not produce whatever the flags:
 
 All three are what GCC 4.x does on MIPS, which fits the `.comment` strings: GCC 3.3.3
 is not the compiler of this code, only close on simple functions.
+
+### GCC 4.0.x rebuilt from GNU sources
+
+Sony's SDK compilers are not available. The build kit of
+[Jstar269/LBP-PSP-Decomp](https://github.com/Jstar269/LBP-PSP-Decomp)
+(`toolchain/gcc4`, GPL-3.0, commit `754764d1`) builds PSP cross compilers from the
+GNU GCC release tarballs (signatures checked) and the ps2dev psptoolchain Allegrex
+patch (commit `65aaa94632`, "PSPDEV 20051022"); its `x` / `c` builds add tuning that
+project measured on its own retail code (Allegrex in the `cpu` attribute, memory
+move and branch costs, an Allegrex scheduling description, `ins` for bit clears, no
+`mtc1`/`mfc1` delay, block-copy order and `asm` in delay slots). They assemble with
+the Sony binutils 2.14 assembler of the decomp.me `psp-gcc-1.3.1` archive. The manual
+workflow `.github/workflows/probe-gcc4.yml` builds them (cached) and runs the probe.
+
+2026-11-24 (run 45472839552, `tools/probes/gcc_leaf.c`):
+
+| Build | `-O2 -G0` | `-Os -G0` | with `-ffast-math` |
+|---|---|---|---|
+| `4.0.2h` (GCC 4.0.2 PSPDEV 20051022, stock patch) | 11/12 | 5/12 | same |
+| `4.0.4h` (GCC 4.0.4, stock patch) | 11/12 | 5/12 | same |
+| `4.0.4c` (GCC 4.0.4, patch + LBP tuning) | **12/12** | 6/12 | same |
+
+- `-O2`, not `-Os`: `-Os` changes `func_0000124C`, `func_0008B5B4`, `func_00120D34`,
+  `func_001A7D5C` and the block copies.
+- `-ffast-math` is not needed: GCC 4.0.x emits `sqrt.s` for `sqrtf` at `-O2`
+  (`func_00008150`), unlike GCC 3.3.3.
+- The stock builds miss only `func_000850DC`: they store the float before the second
+  byte (`sb 0x0`, `swc1 0x4`, `sb 0x1`); the original and `4.0.4c` store both bytes,
+  then the float. The difference is instruction scheduling, which the kit's Allegrex
+  scheduling description (loads latency 3, stores holding the memory unit) changes.
+- The probes cover `.text` from 0x124C to 0x1DB5EC: no region needing another
+  compiler has shown up yet. The other `.comment` strings (GCC 3.3.6, pspdev 4.0.2)
+  probably come from libraries; to check once the region map exists.
+
+Open: whether `4.0.4c`'s LBP-specific changes (block-copy loop order, `ins`) also
+hold for this game: they only matter once a function uses them. A function that
+matches with `4.0.4h` but not `4.0.4c` would say so.
