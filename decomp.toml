@@ -16,6 +16,19 @@ file = "EBOOT.PRX"
 splat = "splat.eboot.yaml"
 relocatable = true
 
+# GCC 4.0.4 built from GNU sources with the Allegrex patch and tuning of the
+# LBP-PSP-Decomp kit (build 4.0.4c): 12/12 on the probes at -O2 -G0
+# (notes/COMPILER.md). A Linux program, run through WSL on Windows.
+[compiler]
+name = "psp-gcc-4.0.4c"
+linux = "~/lbp-gcc4/psp-gcc-4.0.4c/bin/psp-gcc"
+flags = "-O2 -G0"
+
+# tools/common/try_unit.py: the code not split into units is all in text.s
+[try]
+compile = "{cc} -c {flags} -Iinclude -Isrc -o {obj} {src}"
+target = "build/{version}/asm/{version}/eboot/{piece}.s.o"
+
 # tools/common/report_diff.py: units that hold the code not yet in a source file
 [report]
 auto_units = ["asm/"]

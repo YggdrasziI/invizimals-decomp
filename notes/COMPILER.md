@@ -88,3 +88,11 @@ workflow `.github/workflows/probe-gcc4.yml` builds them (cached) and runs the pr
 Open: whether `4.0.4c`'s LBP-specific changes (block-copy loop order, `ins`) also
 hold for this game: they only matter once a function uses them. A function that
 matches with `4.0.4h` but not `4.0.4c` would say so.
+
+### Adopted
+
+2026-11-24: `4.0.4c` at `-O2 -G0` is the `[compiler]` of `decomp.toml`. Built in WSL
+(Ubuntu 24.04) with the same recipe, its code generation fingerprint equals the kit's
+(`check.sh`: `FINGERPRINT_OK`; the binaries differ only by the embedded install path)
+and the probe gives 12/12 locally. The CI build job builds it on a cache miss, checks
+the fingerprint and runs the probe on every push.

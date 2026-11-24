@@ -38,7 +38,10 @@ WIBO_VERSION = "1.2.0"  # runs the Windows compiler on Linux and macOS
 # and then the build is all assembly
 COMPILER_CONFIG = project.CONFIG.get("compiler")
 COMPILER = COMPILER_CONFIG["name"] if COMPILER_CONFIG else None
-CC_EXE = COMPILER_CONFIG["exe"] if COMPILER_CONFIG else None
+# a compiler built from source on Linux (notes/COMPILER.md): not downloaded, run
+# through WSL on Windows (tools/common/linux_run.py)
+CC_LINUX = COMPILER_CONFIG.get("linux") if COMPILER_CONFIG else None
+CC_EXE = COMPILER_CONFIG.get("exe") if COMPILER_CONFIG else None
 CC_FLAGS = (COMPILER_CONFIG["flags"] if COMPILER_CONFIG else "") + " -Iinclude -Isrc"
 
 AS_FLAGS = "-EL -march=mips32r2 -mabi=32 -G0 -no-pad-sections -Iinclude"
@@ -153,12 +156,16 @@ def main() -> None:
            description="DOWNLOAD objdiff-cli")
     n.build(f"objdiff-cli{platform.exe}", "download_objdiff")
     cc = compiler_dir / (CC_EXE or "none")
-    cc_deps = [posix(cc), f"{psp}/compile.py"]
-    if COMPILER:
+    cc_deps = [f"{psp}/compile.py"]
+    if COMPILER and not CC_LINUX:
+        cc_deps.append(posix(cc))
         n.rule("download_compiler", f"$python {psp}/download_tool.py compiler {COMPILER} --path {posix(compiler_dir)}",
                description=f"DOWNLOAD {COMPILER}")
         n.build(posix(cc), "download_compiler")
-    if platform.system == "windows" or not COMPILER:
+    if CC_LINUX:
+        cc_deps.append("tools/common/linux_run.py")
+        cc_command = " ".join(posix(a) for a in project.linux_command(CC_LINUX))
+    elif platform.system == "windows" or not COMPILER:
         cc_command = str(cc)
     else:
         n.rule("download_wibo", f"$python {psp}/download_tool.py wibo {WIBO_VERSION} --path $out",

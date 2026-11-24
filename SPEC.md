@@ -47,8 +47,9 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   psp-2.7.3), GCC 3.3.6 and PSPDEV GCC 4.0.2. Sony's builds are not available; an
   open-source GCC 4.0.4 rebuilt with the pspdev Allegrex patch and the LBP-PSP-Decomp
   tuning (`4.0.4c`) at `-O2 -G0` reproduces all twelve probe functions
-  (`notes/COMPILER.md`). It is a Linux program, built in CI only so far; no
-  `[compiler]` in `decomp.toml` yet: the build is all assembly.
+  (`notes/COMPILER.md`). It is the `[compiler]` of `decomp.toml`: a Linux program in
+  `~/lbp-gcc4/psp-gcc-4.0.4c`, built from source by the kit (CI: cached), run through
+  WSL on Windows (`tools/common/linux_run.py`).
 
 ## Build pipeline
 

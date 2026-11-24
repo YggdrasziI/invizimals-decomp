@@ -35,7 +35,12 @@ Dependencies
 - [ninja](https://github.com/ninja-build/ninja/releases) in `%PATH%`
   (`pip install ninja` works too).
 - [7-Zip](https://www.7-zip.org/) to extract the ISO.
-- On Windows use native tooling; WSL or msys2 are not required.
+- The C compiler: GCC 4.0.4 for the PSP built from GNU sources with the
+  [LBP-PSP-Decomp](https://github.com/Jstar269/LBP-PSP-Decomp) kit
+  (`toolchain/gcc4`, build `4.0.4c`, as `.github/workflows/build.yml` does), installed
+  in `~/lbp-gcc4` of a Linux system. It is a Linux program: on Windows, the build runs
+  it in WSL (Ubuntu 24.04); the rest of the tooling is native. Only needed once there
+  is C in `src/`.
 
 [pspdecrypt](https://github.com/John-K/pspdecrypt) is downloaded by
 `tools/extract.py`; the MIPS binutils and objdiff-cli by the first `ninja` run.
