@@ -1,0 +1,139 @@
+SPDX-License-Identifier: GPL-3.0-or-later
+Block copies of GCC 4.0.4 as in the game's retail compiler (notes/COMPILER.md), for the
+build psp-gcc-4.0.4a: the LBP-PSP-Decomp kit's psp-gcc-4.0.4c work tree plus this diff
+(tools/gcc/build_404a.sh). Applies with `patch -p1` in gcc-4.0.4/ after the kit's diffs.
+In config/mips/mips.c, mips_block_move_loop:
+- a copy whose source or destination is not known to be word aligned tests the
+  alignment at run time, as GCC 3.3's expand_block_move did (removed in GCC 3.4): one
+  loop for the unaligned case, then one with lw/sw;
+- the loop for an unaligned source or destination stores two words, advances both
+  pointers, then stores the last two at -8/-4 (word-aligned copies keep the kit's
+  order, change C1).
+GCC code is GPL-2.0-or-later (GCC 4.0.4) and the kit's context GPL-3.0-or-later.
+--- a/gcc/config/mips/mips.c
++++ b/gcc/config/mips/mips.c
+@@ -2988,22 +2988,10 @@
+    memory regions do not overlap.  */
+ 
+ static void
+-mips_block_move_loop (rtx dest, rtx src, HOST_WIDE_INT length)
++mips_block_move_loop_body (rtx dest, rtx src, rtx src_reg, rtx dest_reg,
++			   rtx final_src)
+ {
+-  rtx label, src_reg, dest_reg, final_src;
+-  HOST_WIDE_INT leftover;
+-
+-  leftover = length % MAX_MOVE_BYTES;
+-  length -= leftover;
+-
+-  /* Create registers and memory references for use within the loop.  */
+-  mips_adjust_block_mem (src, MAX_MOVE_BYTES, &src_reg, &src);
+-  mips_adjust_block_mem (dest, MAX_MOVE_BYTES, &dest_reg, &dest);
+-
+-  /* Calculate the value that SRC_REG should have after the last iteration
+-     of the loop.  */
+-  final_src = expand_simple_binop (Pmode, PLUS, src_reg, GEN_INT (length),
+-				   0, 0, OPTAB_WIDEN);
++  rtx label;
+ 
+   /* Emit the start of the loop.  */
+   label = gen_label_rtx ();
+@@ -3031,6 +3019,40 @@
+ 					i * UNITS_PER_WORD - MAX_MOVE_BYTES),
+ 			regs[i]);
+     }
++  else if (MAX_MOVE_REGS == 4)
++    {
++      /* One side unaligned (retail order): store two words, advance both
++	 pointers, store the last two at -8/-4.  */
++      rtx regs[MAX_MOVE_REGS];
++      int i;
++
++      for (i = 0; i < MAX_MOVE_REGS; i++)
++	{
++	  regs[i] = gen_reg_rtx (word_mode);
++	  if (MEM_ALIGN (src) >= BITS_PER_WORD)
++	    emit_move_insn (regs[i], adjust_address (src, word_mode,
++						     i * UNITS_PER_WORD));
++	  else if (!mips_expand_unaligned_load (regs[i],
++						adjust_address (src, BLKmode,
++								i * UNITS_PER_WORD),
++						BITS_PER_WORD, 0))
++	    gcc_unreachable ();
++	}
++      for (i = 0; i < MAX_MOVE_REGS; i++)
++	{
++	  HOST_WIDE_INT off = i * UNITS_PER_WORD - (i >= 2 ? MAX_MOVE_BYTES : 0);
++	  if (i == 2)
++	    {
++	      emit_move_insn (src_reg, plus_constant (src_reg, MAX_MOVE_BYTES));
++	      emit_move_insn (dest_reg, plus_constant (dest_reg, MAX_MOVE_BYTES));
++	    }
++	  if (MEM_ALIGN (dest) >= BITS_PER_WORD)
++	    emit_move_insn (adjust_address (dest, word_mode, off), regs[i]);
++	  else if (!mips_expand_unaligned_store (adjust_address (dest, BLKmode, off),
++						 regs[i], BITS_PER_WORD, 0))
++	    gcc_unreachable ();
++	}
++    }
+   else
+     {
+       mips_block_move_straight (dest, src, MAX_MOVE_BYTES);
+@@ -3046,6 +3068,57 @@
+   else
+     emit_insn (gen_cmpsi (src_reg, final_src));
+   emit_jump_insn (gen_bne (label));
++}
++
++static void
++mips_block_move_loop (rtx dest, rtx src, HOST_WIDE_INT length)
++{
++  rtx src_reg, dest_reg, final_src;
++  HOST_WIDE_INT leftover;
++
++  leftover = length % MAX_MOVE_BYTES;
++  length -= leftover;
++
++  /* Create registers and memory references for use within the loop.  */
++  mips_adjust_block_mem (src, MAX_MOVE_BYTES, &src_reg, &src);
++  mips_adjust_block_mem (dest, MAX_MOVE_BYTES, &dest_reg, &dest);
++
++  /* Calculate the value that SRC_REG should have after the last iteration
++     of the loop.  */
++  final_src = expand_simple_binop (Pmode, PLUS, src_reg, GEN_INT (length),
++				   0, 0, OPTAB_WIDEN);
++
++  if (MEM_ALIGN (src) >= BITS_PER_WORD && MEM_ALIGN (dest) >= BITS_PER_WORD)
++    mips_block_move_loop_body (dest, src, src_reg, dest_reg, final_src);
++  else
++    {
++      /* GCC 3.3 (expand_block_move): if the alignment is not word aligned,
++	 test at run time whether things wound up aligned, and use lw/sw
++	 then.  */
++      rtx temp = gen_reg_rtx (Pmode);
++      rtx aligned_label = gen_label_rtx ();
++      rtx join_label = gen_label_rtx ();
++      rtx asrc, adest;
++
++      emit_insn (gen_iorsi3 (temp, src_reg, dest_reg));
++      emit_insn (gen_andsi3 (temp, temp, GEN_INT (UNITS_PER_WORD - 1)));
++      emit_insn (gen_cmpsi (temp, const0_rtx));
++      emit_jump_insn (gen_beq (aligned_label));
++
++      /* Unaligned loop.  */
++      mips_block_move_loop_body (dest, src, src_reg, dest_reg, final_src);
++      emit_jump_insn (gen_jump (join_label));
++      emit_barrier ();
++
++      /* Aligned loop.  */
++      emit_label (aligned_label);
++      asrc = copy_rtx (src);
++      adest = copy_rtx (dest);
++      set_mem_align (asrc, BITS_PER_WORD);
++      set_mem_align (adest, BITS_PER_WORD);
++      mips_block_move_loop_body (adest, asrc, src_reg, dest_reg, final_src);
++      emit_label (join_label);
++    }
+ 
+   /* Mop up any left-over bytes.  */
+   if (leftover)

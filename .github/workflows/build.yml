@@ -52,7 +52,7 @@ jobs:
         run: pip install -r tools/requirements.txt
 
       # The compilers of the C units ([compiler] of decomp.toml): GCC 4.0.4 (build
-      # 4.0.4c, as probe-gcc4.yml) for the game and the stock PSPDEV GCC 4.0.2 (build
+      # 4.0.4c, as probe-gcc4.yml, then 4.0.4a = 4.0.4c + tools/gcc/block-move-4.0.4.diff) for the game and the stock PSPDEV GCC 4.0.2 (build
       # 4.0.2h) for src/expat, built from GNU sources by the LBP-PSP-Decomp kit in
       # $HOME/lbp-gcc4. Its assembler is the Sony binutils 2.14 one of the decomp.me
       # psp-gcc-1.3.1 archive, a 32-bit program, in $HOME/hst-gcc where the kit's
@@ -64,7 +64,7 @@ jobs:
           path: |
             ~/lbp-gcc4
             ~/hst-gcc
-          key: gcc4-4.0.4c-4.0.2h-${{ env.KIT_COMMIT }}-${{ env.PSPDEV_TAG }}
+          key: gcc4-4.0.4c-4.0.2h-${{ env.KIT_COMMIT }}-${{ env.PSPDEV_TAG }}-${{ hashFiles('tools/gcc/**') }}
 
       - name: Compiler runtime
         run: |
@@ -94,6 +94,7 @@ jobs:
           JOBS=$(nproc) LBP_GCC4_DL=/tmp/gcc4-dl sh /opt/kit/toolchain/gcc4/check.sh 4.0.4c 4.0.2h > /tmp/check.log \
             || { cat /tmp/check.log; exit 1; }
           grep -v BINARY_DIFFERS /tmp/check.log
+          LBP_GCC4_WORK=/tmp/gcc4-work JOBS=$(nproc) sh tools/gcc/build_404a.sh
 
       # Absolute image, splat, assemble, link, PRX, SHA-1 check
       - name: Build
@@ -106,7 +107,7 @@ jobs:
         if: matrix.version == 'UCES01241'  # the probe holds addresses of this version
         run: |
           python tools/psp/compiler_probe.py tools/probes/gcc_leaf.c \
-            --cc "$HOME/lbp-gcc4/psp-gcc-4.0.4c/bin/psp-gcc" --version ${{ matrix.version }} -- -O2 -G0 -mpreferred-stack-boundary=4 \
+            --cc "$HOME/lbp-gcc4/psp-gcc-4.0.4a/bin/psp-gcc" --version ${{ matrix.version }} -- -O2 -G0 -mpreferred-stack-boundary=4 \
             > /tmp/probe.log || { cat /tmp/probe.log; exit 1; }
           cat /tmp/probe.log
           tail -n 1 /tmp/probe.log | awk '{ split($1, n, "/"); exit n[1] != n[2] }'

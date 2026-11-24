@@ -52,3 +52,13 @@ pspdev patches GPL-2.0-or-later) and runs its `build.sh` in CI (builds `4.0.4c` 
 `4.0.2h`, the latter for `src/expat`). Nothing of the kit is
 copied into this repository. It also downloads the pspdev release `v20261001` (for
 `psp-ld`) and the decomp.me `psp-gcc-1.3.1` archive (for the Sony assembler).
+
+## GCC change (`tools/gcc/block-move-4.0.4.diff`)
+
+A diff of `gcc/config/mips/mips.c` of GCC 4.0.4 (GPL-2.0-or-later), written for this
+project and marked GPL-3.0-or-later: its context holds the LBP-PSP-Decomp kit's change
+C1 (`lbp-copy-order-asm-slot-4.0.4.diff`, GPL-3.0-or-later,
+[Jstar269/LBP-PSP-Decomp](https://github.com/Jstar269/LBP-PSP-Decomp) commit
+`754764d14759`), and its run-time alignment test follows GCC 3.3.6's
+`expand_block_move` (GPL-2.0-or-later). Neither GCC nor the kit is copied into the
+repository; `tools/gcc/build_404a.sh` applies the diff to the kit's work tree.

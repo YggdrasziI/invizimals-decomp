@@ -121,8 +121,9 @@ then an unaligned loop and an aligned loop, both in the order of the table. With
 Bullet's `btPersistentManifold::refreshContactPoints` (0x152B28) has the original's size
 (342 instructions, 288 with `4.0.4c`) and its copy (0x152D9C) is identical; what is left
 differs in the floating-point code before it. The probe object and the build are the
-same as with `4.0.4c`. Not adopted: the kit is shared, a new build needs the owner's
-decision.
+same as with `4.0.4c`. Adopted 2026-11-24 (owner's decision) as the `[compiler]` of
+`decomp.toml`: `tools/gcc/block-move-4.0.4.diff` (GPL-3.0-or-later, GCC code), applied
+to the kit's `4.0.4c` work tree by `tools/gcc/build_404a.sh` (local and CI).
 
 ### Adopted
 
