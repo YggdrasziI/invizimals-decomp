@@ -1,0 +1,87 @@
+# splat config for PSP_GAME/SYSDIR/EBOOT.BIN, decrypted (UCES01241, Europe 1.00)
+#
+# The target is the "absolute" image written by tools/psp/prx_reloc.py --absolute:
+# the PRX with every reference to program header 1 (.data/.sbss/.bss) moved from
+# segment-relative to absolute, so symbols resolve. The build links this layout,
+# then tools/psp/prx_reloc.py --relative gives back the PRX.
+#
+# File layout (tools/psp/prx_info.py): ELF header + 3 program headers, program
+# header 0 (file 0xC0, vram 0x0), program header 1 (file 0x243840, vram
+# 0x243780), then the relocation tables, .comment, .shstrtab, section headers.
+# file offset = vram + 0xC0 in both segments.
+options:
+  platform: psp
+  basename: EBOOT
+  base_path: ../..
+  target_path: build/UCES01241/EBOOT.abs.prx
+  compiler: GCC # splat output style only; the compiler is not proven yet (notes/COMPILER.md)
+  ld_script_path: build/UCES01241/eboot.ld
+  asm_path: asm/UCES01241/eboot
+  src_path: src
+  build_path: build/UCES01241
+  asset_path: build/UCES01241/bin
+  cache_path: build/UCES01241/.splat_cache
+  symbol_addrs_path:
+    - config/UCES01241/symbol_addrs.eboot.txt
+    - config/UCES01241/symbol_addrs.txt
+  # symbol guesses the PRX does not relocate (tools/psp/reloc_overrides.py)
+  reloc_addrs_path:
+    - config/UCES01241/reloc_addrs.eboot.txt
+  undefined_funcs_auto_path: build/UCES01241/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/UCES01241/undefined_syms_auto.txt
+  # module info: gp 0xCA10 relative to program header 1 (0x243780), i.e. .sbss + 0x7FF0
+  gp_value: 0x250190
+  add_set_gp_64: false
+  section_order: [.text, .rodata, .data, .bss]
+  find_file_boundaries: false
+  migrate_rodata_to_functions: true
+  disassemble_all: true
+  disasm_unknown: true
+  use_legacy_include_asm: false
+  asm_jtbl_label_macro: jlabel
+  ld_bss_is_noload: true
+  # the PRX sections are not 16-aligned: keep the original layout
+  ld_align_segment_vram_end: false
+  ld_align_section_vram_end: false
+  ld_generate_symbol_per_data_segment: true
+  create_undefined_funcs_auto: true
+  create_undefined_syms_auto: true
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - [0x0, bin, elf_header]
+
+  # Program header 0
+  - name: main
+    type: code
+    start: 0xC0
+    vram: 0x0
+    subalign: null
+    align: 4
+    subsegments:
+      - [0xC0, asm, text]                  # .init .text .fini
+      - [0x1E3370, asm, scestub]           # .sceStub.text (system imports)
+      - [0x1E3E10, rodata, lib]            # .lib.ent*, .lib.stub*, .rodata.sceModuleInfo
+      - [0x1E41AC, rodata, sceresident]    # .rodata.sceResident
+      - [0x1E44B4, rodata, scenid]         # .rodata.sceNid
+      - [0x1E4A04, rodata, ctors]          # .ctors .dtors .jcr
+      - [0x1E4BDC, rodata, eh_frame]       # .eh_frame .gcc_except_table
+      - [0x20B840, rodata, rodata]         # .rodata .rodata.0001-0104, padding
+
+  # Program header 1
+  - name: data
+    type: code
+    start: 0x243840
+    vram: 0x243780
+    bss_size: 0x40B4D8
+    subalign: null
+    align: 4
+    subsegments:
+      - [0x243840, data, data]             # .data .data.0001
+      - { start: 0x248258, type: bss, vram: 0x248198, name: bss } # .sbss .bss .bss.0001-0002
+
+  - [0x248258, bin, elf_tail]
+  - [0x314D34]

@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""Generate build.ninja for the Invizimals decompilation.
+
+Pipeline for each module of decomp.toml (SPEC.md, "Build"):
+
+  orig PRX --prx_reloc --absolute--> absolute image --splat--> asm/, linker script
+  asm/*.s --vfpu_words--> as --> .o ; src/*.c(pp) --compiler (compile.py)--> .o ;
+  bin/*.bin --objcopy--> .o
+  ld (splat linker script) --> .elf --objcopy -O binary--> absolute image
+  --prx_reloc --relative--> PRX, checked against config/<version>/build.sha1
+
+objdiff: each C/C++ unit is compared with a target object assembled from the
+splat assembly of its functions; the remaining assembly files are target-only
+units, so the report covers the whole module.
+"""
+
+import argparse
+import json
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools" / "psp"))
+sys.path.insert(0, str(ROOT / "tools" / "common"))
+
+import ninja_syntax  # noqa: E402
+import project  # noqa: E402
+from get_platform import get_platform  # noqa: E402
+
+BINUTILS_TAG = "v0.10"  # decompals/binutils-mips-ps2-decompals
+BINUTILS_PREFIX = project.BINUTILS_PREFIX
+OBJDIFF_VERSION = "v3.8.3"
+WIBO_VERSION = "1.2.0"  # runs the Windows compiler on Linux and macOS
+# [compiler] of decomp.toml (notes/COMPILER.md); absent until the probes prove one,
+# and then the build is all assembly
+COMPILER_CONFIG = project.CONFIG.get("compiler")
+COMPILER = COMPILER_CONFIG["name"] if COMPILER_CONFIG else None
+CC_EXE = COMPILER_CONFIG["exe"] if COMPILER_CONFIG else None
+CC_FLAGS = (COMPILER_CONFIG["flags"] if COMPILER_CONFIG else "") + " -Iinclude -Isrc"
+
+AS_FLAGS = "-EL -march=mips32r2 -mabi=32 -G0 -no-pad-sections -Iinclude"
+LD_FLAGS = "-EL --no-check-sections"
+
+
+parser = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument("-v", "--version", choices=project.VERSIONS, default=project.DEFAULT_VERSION)
+parser.add_argument("--binutils", type=Path, help="Directory of pre-installed binutils")
+parser.add_argument("--no-split", action="store_true",
+                    help="Do not run splat (use the existing asm/ and linker script)")
+args = parser.parse_args()
+
+platform = get_platform()
+if platform is None:
+    sys.exit(1)
+
+version = args.version
+build_dir = Path("build") / version
+orig_dir = Path("orig") / version
+config_dir = Path("config") / version
+binutils_dir = args.binutils or Path("tools") / "binutils"
+compiler_dir = Path("tools") / "compilers" / (COMPILER or "none")
+python = sys.executable.replace("\\", "/")
+psp = "tools/psp"
+
+
+def tool(name: str) -> str:
+    return str(binutils_dir / f"{BINUTILS_PREFIX}{name}{platform.exe}")
+
+
+def posix(path: Path | str) -> str:
+    return str(path).replace("\\", "/")
+
+
+def split(module: project.Module) -> None:
+    """Run splat for one module (PRX: on its absolute image)."""
+    # splat does not delete files of subsegments that were renamed or split
+    shutil.rmtree(ROOT / "asm" / version / module.name, ignore_errors=True)
+    if module.relocatable:
+        image = build_dir / module.file.replace(".PRX", ".abs.prx")
+        subprocess.run([sys.executable, f"{psp}/prx_reloc.py", str(orig_dir / module.file),
+                        str(image), "--absolute"], check=True, cwd=ROOT)
+    subprocess.run([sys.executable, "-m", "splat", "split", str(config_dir / module.splat)],
+                   check=True, cwd=ROOT, stdout=subprocess.DEVNULL)
+
+
+def linker_inputs(ld_script: Path) -> list[str]:
+    """Object files named in a splat linker script, in order."""
+    objs = []
+    for line in (ROOT / ld_script).read_text().splitlines():
+        line = line.strip()
+        if line.startswith(posix(build_dir)) and "(" in line:
+            obj = line.split("(")[0]
+            if obj not in objs:
+                objs.append(obj)
+    return objs
+
+
+def function_vram(path: Path) -> int:
+    """vram of the first instruction of a splat function file."""
+    m = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", (ROOT / path).read_text())
+    return int(m.group(1), 16) if m else 0
+
+
+def write_target_asm(module: str, unit: str) -> Path | None:
+    """Assembly of the original functions of one C/C++ unit, in address order."""
+    asm_root = Path("asm") / version / module
+    funcs = [f for d in ("matchings", "nonmatchings") for f in (ROOT / asm_root / d / unit).glob("*.s")]
+    if not funcs:
+        return None
+    funcs = sorted((f.relative_to(ROOT) for f in funcs), key=function_vram)
+    out = build_dir / "target" / f"{unit}.s"
+    (ROOT / out).parent.mkdir(parents=True, exist_ok=True)
+    lines = ['.include "macro.inc"', ".set noat", ".set noreorder", '.section .text, "ax"']
+    # Copied, not included: assemble.py turns VFPU instructions into words in this file only
+    lines += [(ROOT / f).read_text() for f in funcs]
+    (ROOT / out).write_text("\n".join(lines) + "\n", newline="\n")
+    return out
+
+
+def write_objdiff(units: list[dict]) -> None:
+    config = {
+        "min_version": "2.3.2",
+        "custom_make": "ninja",
+        "build_base": True,
+        "build_target": False,
+        "watch_patterns": ["*.c", "*.cpp", "*.h", "*.hpp", "*.py", "*.yaml", "*.txt", "*.toml"],
+        "units": units,
+    }
+    (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n", newline="\n")
+
+
+def main() -> None:
+    n = ninja_syntax.Writer(open(ROOT / "build.ninja", "w", newline="\n"), width=120)
+    n.comment("Generated by tools/configure.py, do not edit")
+    n.variable("ninja_required_version", "1.10")
+    n.variable("python", python)
+    n.variable("as_flags", AS_FLAGS)
+    n.variable("ld_flags", LD_FLAGS)
+    n.variable("cc_flags", CC_FLAGS)
+    n.newline()
+
+    binutils_stamp = binutils_dir / f"{BINUTILS_PREFIX}as{platform.exe}"
+    n.rule("download_binutils",
+           f"$python {psp}/download_tool.py binutils {BINUTILS_TAG} --path {posix(binutils_dir)}",
+           description="DOWNLOAD binutils $tag")
+    n.build(posix(binutils_stamp), "download_binutils")
+    n.rule("download_objdiff",
+           f"$python {psp}/download_tool.py objdiff {OBJDIFF_VERSION} --path $out",
+           description="DOWNLOAD objdiff-cli")
+    n.build(f"objdiff-cli{platform.exe}", "download_objdiff")
+    cc = compiler_dir / (CC_EXE or "none")
+    cc_deps = [posix(cc), f"{psp}/compile.py"]
+    if COMPILER:
+        n.rule("download_compiler", f"$python {psp}/download_tool.py compiler {COMPILER} --path {posix(compiler_dir)}",
+               description=f"DOWNLOAD {COMPILER}")
+        n.build(posix(cc), "download_compiler")
+    if platform.system == "windows" or not COMPILER:
+        cc_command = str(cc)
+    else:
+        n.rule("download_wibo", f"$python {psp}/download_tool.py wibo {WIBO_VERSION} --path $out",
+               description="DOWNLOAD wibo")
+        n.build("tools/wibo", "download_wibo")
+        cc_deps.append("tools/wibo")
+        cc_command = f"tools/wibo {posix(cc)}"
+    n.newline()
+
+    n.rule("as", f"$python {psp}/assemble.py {posix(tool('as'))} $in $out $as_flags",
+           description="AS $in")
+    n.rule("cc", f"$python {psp}/compile.py {posix(tool('objcopy'))} $out {posix(cc_command)} -c $cc_flags -o $out $in",
+           description="CC $in")
+    n.rule("bin", f"{tool('objcopy')} -I binary -O elf32-littlemips -B mips $in $out",
+           description="BIN $in")
+    n.rule("ld", f"{tool('ld')} $ld_flags -T $script $undefined -Map $map -o $out",
+           description="LD $out")
+    n.rule("objcopy", f"{tool('objcopy')} -O binary $in $out", description="OBJCOPY $out")
+    n.rule("relative", f"$python {psp}/prx_reloc.py $in $out --relative", description="PRX $out")
+    n.rule("check", "$python tools/common/sha1.py $in", description="CHECK $in")
+    n.rule("configure", f"$python tools/configure.py --version {version}",
+           description="CONFIGURE", generator=True)
+    n.newline()
+
+    objdiff = r".\objdiff-cli.exe" if platform.system == "windows" else "./objdiff-cli"
+    n.rule("report", f"{objdiff} report generate -o $out",
+           description="REPORT $out")
+    n.newline()
+
+    # the assembly passes through these scripts: a change must assemble again
+    as_deps = [posix(binutils_stamp), f"{psp}/assemble.py", f"{psp}/vfpu_words.py"]
+    checks = []
+    units = []
+    unit_objs = []
+    for module in project.MODULES.values():
+        ld_script = build_dir / f"{module.name}.ld"
+        if not args.no_split or not (ROOT / ld_script).exists():
+            split(module)
+        objs = linker_inputs(ld_script)
+        for obj in objs:
+            # build/<v>/asm/.../x.s.o <- asm/.../x.s ; build/<v>/src/.../x.cpp.o <- src/.../x.cpp ;
+            # build/<v>/bin/x.bin.o <- build/<v>/bin/x.bin
+            src = obj[:-2]
+            if src.endswith(".s"):
+                n.build(obj, "as", src[len(posix(build_dir)) + 1:], implicit=as_deps)
+                if Path(src).name.startswith("text"):
+                    # code not split into units yet
+                    units.append({"name": f"asm/{module.name}/{Path(src).stem}", "target_path": obj,
+                                  "metadata": {"complete": False, "auto_generated": True}})
+                    unit_objs.append(obj)
+            elif src.endswith((".c", ".cpp")):
+                if not COMPILER:
+                    sys.exit(f"{src}: no [compiler] in decomp.toml")
+                source = src[len(posix(build_dir)) + 1:]
+                n.build(obj, "cc", source, implicit=cc_deps + [posix(binutils_stamp)])
+                unit = Path(source).with_suffix("").relative_to("src").as_posix()
+                target_asm = write_target_asm(module.name, unit)
+                # A source unit holds matched functions only, so it is always linked from source
+                unit_entry = {"name": unit, "base_path": obj,
+                              "metadata": {"complete": True, "source_path": source}}
+                if target_asm:
+                    target_obj = posix(build_dir / "target" / f"{unit}.o")
+                    n.build(target_obj, "as", posix(target_asm), implicit=as_deps)
+                    unit_entry["target_path"] = target_obj
+                    unit_objs.append(target_obj)
+                units.append(unit_entry)
+                unit_objs.append(obj)
+            else:
+                n.build(obj, "bin", src, implicit=[posix(binutils_stamp)])
+        elf = build_dir / f"{module.name}.elf"
+        undefined = [build_dir / "undefined_syms_auto.txt", build_dir / "undefined_funcs_auto.txt"]
+        n.build(posix(elf), "ld", objs, implicit=[posix(ld_script)] + [posix(u) for u in undefined],
+                variables={"script": posix(ld_script), "map": posix(elf.with_suffix(".map")),
+                           "undefined": " ".join(f"-T {posix(u)}" for u in undefined)})
+        prx = build_dir / module.file
+        if module.relocatable:
+            image = build_dir / f"{module.name}.bin"
+            n.build(posix(image), "objcopy", posix(elf))
+            n.build(posix(prx), "relative", posix(image))
+        else:
+            n.build(posix(prx), "objcopy", posix(elf))
+        check = f"check_{module.name}"
+        n.build(check, "check", posix(config_dir / "build.sha1"), implicit=[posix(prx)])
+        checks.append(check)
+        n.newline()
+
+    write_objdiff(units)
+    report = posix(build_dir / "report.json")
+    n.build(report, "report", "objdiff.json", implicit=[f"objdiff-cli{platform.exe}"] + unit_objs)
+    n.build("report", "phony", report)
+    n.newline()
+
+    # splat reads the symbol and relocation files too: a change must split again
+    split_inputs = [posix(config_dir / m.splat) for m in project.MODULES.values()]
+    split_inputs += [posix(p.relative_to(ROOT)) for p in sorted((ROOT / config_dir).glob("symbol_addrs*.txt"))]
+    split_inputs += [posix(p.relative_to(ROOT)) for p in sorted((ROOT / config_dir).glob("reloc_addrs*.txt"))]
+    n.build("build.ninja", "configure", implicit=["tools/configure.py", "decomp.toml"] + split_inputs)
+    n.build("all", "phony", checks)
+    n.default("all")
+    print("build.ninja written")
+
+
+main()
