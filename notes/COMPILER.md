@@ -97,6 +97,33 @@ in `func_00152B28`) and 1 after it (0x1C7B20). No build of the kit emits the tes
 `4.0.4c` gives the unaligned loop only. A function with such a copy cannot match until
 the compiler change behind it is found.
 
+Origin (2026-11-24): the test is GCC 3.3's. `gcc/config/mips/mips.c` of GCC 3.3.6,
+`expand_block_move`: "If the alignment is not word aligned, generate a test at runtime,
+to see whether things wound up aligned, and we can use the faster lw/sw instead
+ulw/usw" (`gen_iorsi3 (temp, src_reg, dest_reg)`, `gen_andsi3 (..., UNITS_PER_WORD -
+1)`, `beq` to the aligned loop, the unaligned loop first). GCC 3.4.0 and 4.0.4 no
+longer have it (`mips_block_move_loop` only). The original's loops are not GCC 3.3's
+(there a block move is one insn printed whole, never mixed with the pointer
+increments), so the retail GCC 4.0.4 kept 3.3's test in front of 4.0's loop.
+
+Loop orders in the EBOOT (copy loops of 16 bytes per iteration, two pointers):
+
+| Alignment (load/store) | Order | Loops |
+|---|---|---|
+| aligned / aligned | `sw 0`, both pointers advance, `sw -12/-8/-4` | 416 |
+| aligned / unaligned | two words stored, pointers advance, last two at `-8/-4` | 10 (+1 scheduled differently) |
+| unaligned / aligned | same | 7 |
+| unaligned / unaligned | same | 3 |
+
+Experiment (build `4.0.4a`, outside the kit: `4.0.4c` plus a change of
+`mips_block_move_loop`): word-aligned copies as before; otherwise 3.3's run-time test,
+then an unaligned loop and an aligned loop, both in the order of the table. With it,
+Bullet's `btPersistentManifold::refreshContactPoints` (0x152B28) has the original's size
+(342 instructions, 288 with `4.0.4c`) and its copy (0x152D9C) is identical; what is left
+differs in the floating-point code before it. The probe object and the build are the
+same as with `4.0.4c`. Not adopted: the kit is shared, a new build needs the owner's
+decision.
+
 ### Adopted
 
 2026-11-24: `4.0.4c` at `-O2 -G0` is the `[compiler]` of `decomp.toml`. Built in WSL
