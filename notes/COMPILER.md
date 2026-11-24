@@ -96,3 +96,34 @@ matches with `4.0.4h` but not `4.0.4c` would say so.
 (`check.sh`: `FINGERPRINT_OK`; the binaries differ only by the embedded install path)
 and the probe gives 12/12 locally. The CI build job builds it on a cache miss, checks
 the fingerprint and runs the probe on every push.
+
+## expat 2.0.0: the stock PSPDEV GCC 4.0.2
+
+2026-11-24. The upstream sources of expat 2.0.0 (`src/expat`, unmodified), compiled at
+`-O2 -G0` and searched by content in 0x17661C-0x18DE70 (relocated fields masked):
+
+| Build | `xmlrole.c` | `xmltok.c` |
+|---|---|---|
+| `4.0.4c` (the game's) | 35/48 | 30/102 |
+| `4.0.4h` (stock patch) | **48/48** | 97/102 |
+| `4.0.2h` (PSPDEV 20051022) | **48/48** | 97/102 |
+
+- So the library was not built with the game's compiler: the LBP tuning of `4.0.4c`
+  (scheduling) changes it. `4.0.2h` and `4.0.4h` give the same code here; `4.0.2h` is
+  the one the module names (`.comment` `GCC: (GNU) 4.0.2 (PSPDEV 20051022)`), so it is
+  the `[compiler.dirs."src/expat"]` of `decomp.toml` (hypothesis between the two until
+  a function tells them apart). Its fingerprint equals the kit's (`check.sh 4.0.2h`:
+  `FINGERPRINT_OK`).
+- `-O2`: `-O3`, `-Os` and `-O2 -fno-schedule-insns` lose most functions.
+- `XML_DTD` and `XML_NS` (both defined by expat's own configure script) are off: with
+  them `xmlrole.c` and `xmltok.c` hold functions the original does not have, and
+  without them the whole `.text` of `xmlrole.c` (0x19D8 bytes) is identical at
+  0x1805B8, with its `.rodata` at 0x20E624.
+- `assert` calls a function of the game, `func_0000FE5C(file, line, expression)`
+  (`xmlparse.c`, line 1744 at 0x178FE8): `NDEBUG` is off; the matching `assert.h` is
+  still to write.
+- Left: `xmltok.c` (`normal_scanPi`, `little2_sameName`, three `nameMatchesAscii`) and
+  `xmlparse.c` (`XML_ParserFree`, `doContent`) differ by block order and register
+  allocation; flags tried without gain: `-fno-reorder-blocks`, `-fno-crossjumping`,
+  `-fno-gcse`, `-fno-tree-pre`, `-fno-loop-optimize`, `-fno-strict-aliasing`,
+  `-fno-unit-at-a-time`, `-fno-tree-loop-optimize` (with `4.0.4h`).

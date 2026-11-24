@@ -5,3 +5,6 @@
 // 0xF4460, no relocation) also points at: without a name the branch label and
 // the guessed data symbol disagree and the link fails (notes/PRX.md)
 lbl_0000C78C = 0x0000C78C; // type:label
+
+// expat 2.0.0 (src/expat): xmlrole.c matches as a whole at 0x1805B8 (notes/SPLITS.md)
+XmlPrologStateInit = 0x00181F80; // type:func

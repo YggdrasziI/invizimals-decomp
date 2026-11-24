@@ -33,11 +33,22 @@ GPL-2.0-or-later), no code; see `tools/psp/README.md`.
 `SPEC.md` and `notes/` follow the structure of the owner's jd-tlf-decomp and
 mhfu-decomp projects; every fact about this game was established again here.
 
+## expat 2.0.0 (`src/expat`)
+
+The game links expat 2.0.0 (version string `expat_2.0.0` at 0x179384). `src/expat`
+holds the `lib/*.c`, `lib/*.h` and `COPYING` of the release tarball
+`expat-2.0.0.tar.gz` (SourceForge, SHA-256
+`c4280eb80fa8e14b3f204b1d0ec67af66fa04c4f9dae9c78a1a8ee4c6f485ddd`; the same files as
+the GitHub tag `R_2_0_0` of libexpat), **unmodified**. License: MIT (`src/expat/COPYING`).
+Written for this project: `include/expat/expat_config.h` (the build configuration,
+in place of the configure script's output) and `include/libc/` (minimal declarations).
+
 ## GCC 4.0.x build kit
 
 The probe workflow `.github/workflows/probe-gcc4.yml` fetches `toolchain/gcc4` of
 [Jstar269/LBP-PSP-Decomp](https://github.com/Jstar269/LBP-PSP-Decomp) at commit
 `754764d14759c58969bfe29cdc9ab5346255b7ee` (kit files GPL-3.0-or-later, GCC and the
-pspdev patches GPL-2.0-or-later) and runs its `build.sh` in CI. Nothing of the kit is
+pspdev patches GPL-2.0-or-later) and runs its `build.sh` in CI (builds `4.0.4c` and
+`4.0.2h`, the latter for `src/expat`). Nothing of the kit is
 copied into this repository. It also downloads the pspdev release `v20261001` (for
 `psp-ld`) and the decomp.me `psp-gcc-1.3.1` archive (for the Sony assembler).

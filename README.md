@@ -54,7 +54,7 @@ Dependencies
 - [7-Zip](https://www.7-zip.org/) to extract the ISO.
 - The C compiler: GCC 4.0.4 for the PSP built from GNU sources with the
   [LBP-PSP-Decomp](https://github.com/Jstar269/LBP-PSP-Decomp) kit
-  (`toolchain/gcc4`, build `4.0.4c`, as `.github/workflows/build.yml` does), installed
+  (`toolchain/gcc4`, builds `4.0.4c` and `4.0.2h`, as `.github/workflows/build.yml` does), installed
   in `~/lbp-gcc4` of a Linux system. It is a Linux program: on Windows, the build runs
   it in WSL (Ubuntu 24.04); the rest of the tooling is native. Only needed once there
   is C in `src/`.

@@ -25,6 +25,12 @@ name = "psp-gcc-4.0.4c"
 linux = "~/lbp-gcc4/psp-gcc-4.0.4c/bin/psp-gcc"
 flags = "-O2 -G0"
 
+# expat 2.0.0 (src/expat, upstream sources unmodified) was built with the stock PSPDEV
+# GCC 4.0.2, not with the game's compiler (notes/COMPILER.md)
+[compiler.dirs."src/expat"]
+linux = "~/lbp-gcc4/psp-gcc-4.0.2h/bin/psp-gcc"
+flags = "-O2 -G0 -DHAVE_EXPAT_CONFIG_H -nostdinc -Iinclude/libc -Iinclude/expat"
+
 # tools/common/try_unit.py: the code not split into units is all in text.s
 [try]
 compile = "{cc} -c {flags} -Iinclude -Isrc -o {obj} {src}"

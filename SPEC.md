@@ -66,7 +66,9 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   tuning (`4.0.4c`) at `-O2 -G0` reproduces all twelve probe functions
   (`notes/COMPILER.md`). It is the `[compiler]` of `decomp.toml`: a Linux program in
   `~/lbp-gcc4/psp-gcc-4.0.4c`, built from source by the kit (CI: cached), run through
-  WSL on Windows (`tools/common/linux_run.py`).
+  WSL on Windows (`tools/common/linux_run.py`). expat 2.0.0 (`src/expat`) was built
+  with the stock PSPDEV GCC 4.0.2 (`4.0.2h`, also built by the kit): its sources set
+  their own compiler and flags (`[compiler.dirs]`).
 
 ## Build pipeline
 

@@ -10,14 +10,18 @@ them. A split that builds proves the bytes, not a translation unit.
 | 0x0 | | `bin elf_header` | ELF header, program headers |
 | 0xC0 | 0x0 | `asm text` | `.init`, `.text` from 0x30 |
 | 0x18D90 | 0x18CD0 | `c unit_00018CD0` | `func_00018CD0` only; bounds are the function's own (hypothesis: the translation unit is not known) |
-| 0x18DB0 | 0x18CF0 | `asm text_00018CF0` | rest of `.text` (to 0x1E3294), `.fini` |
+| 0x18DB0 | 0x18CF0 | `asm text_00018CF0` | `.text` to 0x1805B8 |
+| 0x180678 | 0x1805B8 | `c expat/xmlrole` | expat 2.0.0 `xmlrole.c`, whole file (below) |
+| 0x182050 | 0x181F90 | `asm text_00181F90` | rest of `.text` (to 0x1E3294), `.fini` |
 | 0x1E3370 | 0x1E32B0 | `asm scestub` | `.sceStub.text` |
 | 0x1E3E10 | 0x1E3D50 | `rodata lib` | `.lib.ent*`, `.lib.stub*`, `.rodata.sceModuleInfo` |
 | 0x1E41AC | 0x1E40EC | `rodata sceresident` | `.rodata.sceResident` |
 | 0x1E44B4 | 0x1E43F4 | `rodata scenid` | `.rodata.sceNid` |
 | 0x1E4A04 | 0x1E4944 | `rodata ctors` | `.ctors`, `.dtors`, `.jcr` |
 | 0x1E4BDC | 0x1E4B1C | `rodata eh_frame` | `.eh_frame`, `.gcc_except_table` |
-| 0x20B840 | 0x20B780 | `rodata rodata` | `.rodata`, `.rodata.0001`-`.0106`, padding |
+| 0x20B840 | 0x20B780 | `rodata rodata` | `.rodata`, `.rodata.0001`-`.0106`, padding, to 0x20E624 |
+| 0x20E6E4 | 0x20E624 | `.rodata expat/xmlrole` | `xmlrole.c`'s `.rodata` (keywords, jump tables) |
+| 0x20EA08 | 0x20E948 | `rodata rodata_0020E948` | rest of the read-only data |
 | 0x243840 | 0x243780 | `data data` | `.data`, `.data.0001` |
 | (bss) | 0x248198 | `bss bss` | `.sbss`, `.bss`, `.bss.0001`, `.bss.0002` (0x40B4D8) |
 | 0x248258 | | `bin elf_tail` | relocation tables, `.comment`, `.shstrtab`, section headers |
@@ -53,6 +57,19 @@ only where a string gives one.
 | 0x1AC2A0-0x1ACE24 | libsas wrappers (SDK: hypothesis) | thin wrappers of every `__sceSas*` import |
 | 0x1AF818-0x1BA6D0 | C library (reentrancy, stdio, locale, number formatting) | `_getmodreent`, `libc:%s: no reent structure`, `C-UTF-8`, `Infinity`, `e%ld` |
 | 0x1BA6D0-0x1E3294 | inline functions and template instances (`.gnu.linkonce.t.*` placed after the rest: hypothesis) | tiny game getters returning names (`menu_theme`, capture names in near-alphabetical class order), Bullet `btAlignedObjectArray` templates (`./LinearMath/btAlignedAllocator.h`), SDK calls of the game (`sceNpRoster*`, `sceG729*`) |
+
+### expat 2.0.0 files
+
+The upstream sources compiled with the stock PSPDEV GCC 4.0.2 at `-O2 -G0`, without
+`XML_DTD` and `XML_NS` (`notes/COMPILER.md`), found by content in the original
+(relocated fields masked). The files sit in alphabetical order.
+
+| Range | File | Status |
+|---|---|---|
+| 0x17661C-0x17864C | unidentified | no upstream function found here |
+| 0x17864C-0x1805B8 | `xmlparse.c` | 114/116 functions identical; `XML_ParserFree` (register allocation in the tag list loop) and `doContent` (93.8 %) differ |
+| 0x1805B8-0x181F90 | `xmlrole.c` | identical as a whole file (`.text` 0x19D8 bytes, `.rodata` 0x324 bytes at 0x20E624); linked from source |
+| 0x181F90-0x18DE70 | `xmltok.c` | 97/102 functions identical; `normal_scanPi`, `little2_sameName` and the three `nameMatchesAscii` differ (block order, registers) |
 
 Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
 0x1ACE24-0x1AF818) hold more library code without telling strings; 0x1AC080, in the
