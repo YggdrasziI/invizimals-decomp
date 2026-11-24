@@ -25,6 +25,9 @@ relocatable = true
 name = "psp-gcc-4.0.4c"
 linux = "~/lbp-gcc4/psp-gcc-4.0.4c/bin/psp-gcc"
 flags = "-O2 -G0 -mpreferred-stack-boundary=4"
+# the kit's Sony assembler (binutils 2.14, PSP SDK 1.3.1) refuses lwl/lwr/swl/swr,
+# which the game has (copies of unaligned structures): written as .word
+unaligned_words = true
 
 # expat 2.0.0 (src/expat, upstream sources unmodified) was built with the stock PSPDEV
 # GCC 4.0.2, not with the game's compiler (notes/COMPILER.md)

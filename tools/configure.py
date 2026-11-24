@@ -47,6 +47,9 @@ CC_FLAGS = (COMPILER_CONFIG["flags"] if COMPILER_CONFIG else "") + " -Iinclude -
 # for the sources of a directory, e.g. a library built with another toolchain than the
 # game (notes/COMPILER.md); the deepest matching directory wins
 CC_DIRS = COMPILER_CONFIG.get("dirs", {}) if COMPILER_CONFIG else {}
+# unaligned_words = true: lwl/lwr/swl/swr written as .word for an assembler that
+# refuses them (tools/psp/compile.py --unaligned-words)
+CC_OPTIONS = "--unaligned-words " if COMPILER_CONFIG and COMPILER_CONFIG.get("unaligned_words") else ""
 
 AS_FLAGS = "-EL -march=mips32r2 -mabi=32 -G0 -no-pad-sections -Iinclude"
 LD_FLAGS = "-EL --no-check-sections"
@@ -195,7 +198,7 @@ def main() -> None:
     n.rule("as", f"$python {psp}/assemble.py {posix(tool('as'))} $in $out $as_flags",
            description="AS $in")
     n.variable("cc", posix(cc_command))
-    n.rule("cc", f"$python {psp}/compile.py {posix(tool('objcopy'))} $out $cc -c $cc_flags -o $out $in",
+    n.rule("cc", f"$python {psp}/compile.py {CC_OPTIONS}{posix(tool('objcopy'))} $out $cc -c $cc_flags -o $out $in",
            description="CC $in")
     n.rule("bin", f"{tool('objcopy')} -I binary -O elf32-littlemips -B mips $in $out",
            description="BIN $in")
