@@ -1,0 +1,25 @@
+# Project settings read by the tools of tools/psp and tools/common
+
+title = "Invizimals"
+
+# First one is the default version
+versions = [
+    "UCES01241",  # Europe (13 languages), DISC_VERSION 1.00
+]
+
+binutils_prefix = "mips-ps2-decompals-"
+
+# PSP_GAME/SYSDIR/EBOOT.BIN decrypted by tools/extract.py (BOOT.BIN is zeroed on
+# this disc): a relocatable PRX (SPEC.md)
+[modules.eboot]
+file = "EBOOT.PRX"
+splat = "splat.eboot.yaml"
+relocatable = true
+
+# tools/common/report_diff.py: units that hold the code not yet in a source file
+[report]
+auto_units = ["asm/"]
+
+# tools/common/check_traces.py: the README's disclosure line
+[traces]
+allow = ["decompile this for me"]
