@@ -15,7 +15,7 @@ them. A split that builds proves the bytes, not a translation unit.
 | 0x1E44B4 | 0x1E43F4 | `rodata scenid` | `.rodata.sceNid` |
 | 0x1E4A04 | 0x1E4944 | `rodata ctors` | `.ctors`, `.dtors`, `.jcr` |
 | 0x1E4BDC | 0x1E4B1C | `rodata eh_frame` | `.eh_frame`, `.gcc_except_table` |
-| 0x20B840 | 0x20B780 | `rodata rodata` | `.rodata`, `.rodata.0001`-`.0104`, padding |
+| 0x20B840 | 0x20B780 | `rodata rodata` | `.rodata`, `.rodata.0001`-`.0106`, padding |
 | 0x243840 | 0x243780 | `data data` | `.data`, `.data.0001` |
 | (bss) | 0x248198 | `bss bss` | `.sbss`, `.bss`, `.bss.0001`, `.bss.0002` (0x40B4D8) |
 | 0x248258 | | `bin elf_tail` | relocation tables, `.comment`, `.shstrtab`, section headers |
