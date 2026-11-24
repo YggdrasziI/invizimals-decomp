@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [UCES01241]
+        version: [UCES01241, UCUS98746]
 
     steps:
       - name: Checkout
@@ -102,6 +102,7 @@ jobs:
 
       # The compiler still gives the probe functions byte for byte (notes/COMPILER.md)
       - name: Compiler probe
+        if: matrix.version == 'UCES01241'  # the probe holds addresses of this version
         run: |
           python tools/psp/compiler_probe.py tools/probes/gcc_leaf.c \
             --cc "$HOME/lbp-gcc4/psp-gcc-4.0.4c/bin/psp-gcc" --version ${{ matrix.version }} -- -O2 -G0 \
