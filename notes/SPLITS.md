@@ -43,8 +43,8 @@ only where a string gives one.
 | 0x51C-0x133CCC | Game (Novarama) | C++ (FDEs), strings of the game's classes (`CMemMngr`, `CResourcesMngr`, `TCapture*`, `TVideo`), its asset paths; ends with the MPEG/JPEG wrappers (`sceMpeg*` messages, 0x131C64-0x133B58) |
 | 0x133CCC-0x139438 | C++ demangler (libiberty `cp-demangle`, from libsupc++: hypothesis) | 39 functions without FDE using `_GLOBAL_`, `string literal`, `reference temporary for `, ` restrict` |
 | 0x139438-0x13A2C0 | unidentified | small C++ functions (FDEs), no strings |
-| 0x13A2C0-0x17661C | Bullet Physics | source paths `BulletCollision/...cpp`, `BulletDynamics/...cpp`, `./LinearMath/btAlignedAllocator.h` referenced in address order from 0x13A2C0 to 0x174200; end bound: start of the next run without FDEs |
-| 0x17661C-0x18DE70 | expat 2.0.0 (C) | no FDEs; `expat_2.0.0` (0x179384), `xmlparse.c` assertion (0x178FE8), XML namespace URIs and DTD keywords (0x1797B8-0x18DA8C); start: every function up to 0x1764D0 is called from Bullet, from 0x17661C on the calls stay inside; end: the only alignment padding of `.text` (3 nops at 0x18DE64) |
+| 0x13A2C0-0x17864C | Bullet Physics | source paths `BulletCollision/...cpp`, `BulletDynamics/...cpp`, `./LinearMath/btAlignedAllocator.h` referenced in address order from 0x13A2C0 to 0x174200; the floating-point functions 0x176634-0x17864C are Bullet's `btContactConstraint.cpp` (`resolveSingleBilateral`, `resolveSingleCollision*`, `resolveSingleFriction*`: 42-63 % by content, compiled from 2.71 with the VFPU `LinearMath`); end: the start of `xmlparse.c` |
+| 0x17864C-0x18DE70 | expat 2.0.0 (C) | no FDEs; `expat_2.0.0` (0x179384), `xmlparse.c` assertion (0x178FE8), XML namespace URIs and DTD keywords (0x1797B8-0x18DA8C); start: the first function of `xmlparse.c` (by content); end: the only alignment padding of `.text` (3 nops at 0x18DE64) |
 | 0x18DE70-0x18E430 | inflate routine, hand-written assembly (SDK deflate library: hypothesis) | 16-aligned after the padding; one routine that splat splits at its inner entries (`rotrv`, temporaries only, 0x380-byte frame); its only caller, 0x1AC080, checks a zlib header (`CMF & 0xF == 8`, `FDICT`) and returns SDK-style error codes (`0x80000004`) |
 | 0x18E430-0x18FE78 | libgcc soft-float double (`fp-bit` / `dp-bit`: hypothesis) | no FDEs; arguments packed on the stack and unpacked by shared helpers; 0x18E6B4 has 600 callers (float to double, as every `printf` of a float needs), 0x18EA3C / 0x18EAB4 / 0x18EB20 have 125 / 130 / 188 (add, sub, mul), then seven functions of one shape (the seven comparisons); called mostly from the C library |
 | 0x18FE78-0x194B44 | unidentified runtime | small accessors (offsets 0x4D0-0x4E0) called from the C library, then mixed FDE / no FDE code masking interrupts (`sceKernelCpuSuspendIntr` / `ResumeIntr`) |
@@ -66,7 +66,6 @@ The upstream sources compiled with the stock PSPDEV GCC 4.0.2 at `-O2 -G0`, with
 
 | Range | File | Status |
 |---|---|---|
-| 0x17661C-0x17864C | unidentified | no upstream function found here |
 | 0x17864C-0x1805B8 | `xmlparse.c` | 114/116 functions identical; `XML_ParserFree` (register allocation in the tag list loop) and `doContent` (93.8 %) differ |
 | 0x1805B8-0x181F90 | `xmlrole.c` | identical as a whole file (`.text` 0x19D8 bytes, `.rodata` 0x324 bytes at 0x20E624); linked from source |
 | 0x181F90-0x18DE70 | `xmltok.c` | 97/102 functions identical; `normal_scanPi`, `little2_sameName` and the three `nameMatchesAscii` differ (block order, registers) |
