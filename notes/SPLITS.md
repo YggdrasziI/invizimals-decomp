@@ -40,8 +40,10 @@ only where a string gives one.
 | 0x133CCC-0x139438 | C++ demangler (libiberty `cp-demangle`, from libsupc++: hypothesis) | 39 functions without FDE using `_GLOBAL_`, `string literal`, `reference temporary for `, ` restrict` |
 | 0x139438-0x13A2C0 | unidentified | small C++ functions (FDEs), no strings |
 | 0x13A2C0-0x17661C | Bullet Physics | source paths `BulletCollision/...cpp`, `BulletDynamics/...cpp`, `./LinearMath/btAlignedAllocator.h` referenced in address order from 0x13A2C0 to 0x174200; end bound: start of the next run without FDEs |
-| 0x17661C-0x1901B8 | expat 2.0.0 (C) | 318 functions without FDE; `expat_2.0.0` (0x179384), `xmlparse.c` assertion (0x178FE8), XML namespace URIs and DTD keywords (0x1797B8-0x18DA8C) |
-| 0x1901B8-0x194B44 | unidentified runtime | mixed FDE / no FDE, interrupt masking (`sceKernelCpuSuspendIntr` / `ResumeIntr`) |
+| 0x17661C-0x18DE70 | expat 2.0.0 (C) | no FDEs; `expat_2.0.0` (0x179384), `xmlparse.c` assertion (0x178FE8), XML namespace URIs and DTD keywords (0x1797B8-0x18DA8C); start: every function up to 0x1764D0 is called from Bullet, from 0x17661C on the calls stay inside; end: the only alignment padding of `.text` (3 nops at 0x18DE64) |
+| 0x18DE70-0x18E430 | inflate routine, hand-written assembly (SDK deflate library: hypothesis) | 16-aligned after the padding; one routine that splat splits at its inner entries (`rotrv`, temporaries only, 0x380-byte frame); its only caller, 0x1AC080, checks a zlib header (`CMF & 0xF == 8`, `FDICT`) and returns SDK-style error codes (`0x80000004`) |
+| 0x18E430-0x18FE78 | libgcc soft-float double (`fp-bit` / `dp-bit`: hypothesis) | no FDEs; arguments packed on the stack and unpacked by shared helpers; 0x18E6B4 has 600 callers (float to double, as every `printf` of a float needs), 0x18EA3C / 0x18EAB4 / 0x18EB20 have 125 / 130 / 188 (add, sub, mul), then seven functions of one shape (the seven comparisons); called mostly from the C library |
+| 0x18FE78-0x194B44 | unidentified runtime | small accessors (offsets 0x4D0-0x4E0) called from the C library, then mixed FDE / no FDE code masking interrupts (`sceKernelCpuSuspendIntr` / `ResumeIntr`) |
 | 0x194B44-0x1952A0 | C library system glue (SDK libc: hypothesis) | `_exit`, `UserSbrk`, wrappers of `sceIo*` with `sceKernelStd*`, `sceKernelLibcClock` / `Time` / `Gettimeofday`; message `libc:%s: should be called from main thread` |
 | 0x1952A0-0x199B9C | unidentified | |
 | 0x199B9C-0x19D5E8 | libgu (SDK graphics library: hypothesis) | `SceGuSignal`, `sceGe*`, `sceDisplaySetFrameBuf` calls |
@@ -53,6 +55,10 @@ only where a string gives one.
 | 0x1BA6D0-0x1E3294 | inline functions and template instances (`.gnu.linkonce.t.*` placed after the rest: hypothesis) | tiny game getters returning names (`menu_theme`, capture names in near-alphabetical class order), Bullet `btAlignedObjectArray` templates (`./LinearMath/btAlignedAllocator.h`), SDK calls of the game (`sceNpRoster*`, `sceG729*`) |
 
 Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
-0x1ACE24-0x1AF818) hold more library code without telling strings. Next: refine
+0x1ACE24-0x1AF818) hold more library code without telling strings; 0x1AC080, in the
+third, is the zlib-format decompressor that calls the inflate routine.
+
+Alignment padding: the objects of this link have a 4-aligned `.text`, so padding marks
+no unit bound; the single exception is before the inflate routine (above). Next: refine
 each bound (alignment padding, call graph), identify the unidentified ranges, and
 compare `UCUS98746`.

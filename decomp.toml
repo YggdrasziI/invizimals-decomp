@@ -39,8 +39,8 @@ target = "build/{version}/asm/{version}/eboot/{piece}.s.o"
 "C++ demangler" = [[0x133CCC, 0x139438]]
 "Unidentified" = [[0x139438, 0x13A2C0]]
 "Bullet Physics" = [[0x13A2C0, 0x17661C]]
-"expat 2.0.0" = [[0x17661C, 0x1901B8]]
-"SDK and runtime libraries" = [[0x1901B8, 0x1BA6D0]]
+"expat 2.0.0" = [[0x17661C, 0x18DE70]]
+"SDK and runtime libraries" = [[0x18DE70, 0x1BA6D0]]
 "Inline functions and templates" = [[0x1BA6D0, 0x1E3294]]
 
 [progress]
