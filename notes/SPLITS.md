@@ -22,7 +22,37 @@ them. A split that builds proves the bytes, not a translation unit.
 | (bss) | 0x248198 | `bss bss` | `.sbss`, `.bss`, `.bss.0001`, `.bss.0002` (0x40B4D8) |
 | 0x248258 | | `bin elf_tail` | relocation tables, `.comment`, `.shstrtab`, section headers |
 
-## Region map
+## Region map (UCES01241, first pass 2026-11-24)
 
-Not made yet: the next step is the inventory of `.text` (libraries recognised by their
-strings or by the SDK, game code), with the evidence for each bound.
+Evidence used: strings of `.rodata` and the functions that load them (`%lo` operands
+of the splat assembly), calls to the import stubs (`symbol_addrs.eboot.txt`), and
+whether a function has an `.eh_frame` FDE (3454 of 7829 functions do: code compiled
+with unwind tables, C++ here; C libraries and C++ built without exceptions have
+none). A bound is placed on the first function where the evidence changes (start or
+end of a run without FDEs, first identifying string); it is **approximate** until the
+units on each side match. Library names come from strings of the binary; versions
+only where a string gives one.
+
+| Range (vram) | Region | Evidence |
+|---|---|---|
+| 0x30-0x51C | Start-up (module start, main thread) | no FDE; `0xB4` creates the `user_main` thread, `0x228` calls `sceKernelExitThread` / `sceKernelGetModuleIdByAddress` |
+| 0x51C-0x133CCC | Game (Novarama) | C++ (FDEs), strings of the game's classes (`CMemMngr`, `CResourcesMngr`, `TCapture*`, `TVideo`), its asset paths; ends with the MPEG/JPEG wrappers (`sceMpeg*` messages, 0x131C64-0x133B58) |
+| 0x133CCC-0x139438 | C++ demangler (libiberty `cp-demangle`, from libsupc++: hypothesis) | 39 functions without FDE using `_GLOBAL_`, `string literal`, `reference temporary for `, ` restrict` |
+| 0x139438-0x13A2C0 | unidentified | small C++ functions (FDEs), no strings |
+| 0x13A2C0-0x17661C | Bullet Physics | source paths `BulletCollision/...cpp`, `BulletDynamics/...cpp`, `./LinearMath/btAlignedAllocator.h` referenced in address order from 0x13A2C0 to 0x174200; end bound: start of the next run without FDEs |
+| 0x17661C-0x1901B8 | expat 2.0.0 (C) | 318 functions without FDE; `expat_2.0.0` (0x179384), `xmlparse.c` assertion (0x178FE8), XML namespace URIs and DTD keywords (0x1797B8-0x18DA8C) |
+| 0x1901B8-0x194B44 | unidentified runtime | mixed FDE / no FDE, interrupt masking (`sceKernelCpuSuspendIntr` / `ResumeIntr`) |
+| 0x194B44-0x1952A0 | C library system glue (SDK libc: hypothesis) | `_exit`, `UserSbrk`, wrappers of `sceIo*` with `sceKernelStd*`, `sceKernelLibcClock` / `Time` / `Gettimeofday`; message `libc:%s: should be called from main thread` |
+| 0x1952A0-0x199B9C | unidentified | |
+| 0x199B9C-0x19D5E8 | libgu (SDK graphics library: hypothesis) | `SceGuSignal`, `sceGe*`, `sceDisplaySetFrameBuf` calls |
+| 0x19DC20-0x1A2690 | math library | function name strings `fmod`, `acosf`, `asinf`, `atan2f`, `powf`, `sqrtf` (error reporting) |
+| 0x1A627C-0x1A7D40 | libstdc++ / libsupc++ runtime | `gthread_lock` mutex, `terminate called after throwing an instance of '` |
+| 0x1A7DAC-0x1A9620 | libwave (SDK: hypothesis) | `SceWaveMainEvf`, `sceAudioCh*`, `sceAudioOutput*` |
+| 0x1AC2A0-0x1ACE24 | libsas wrappers (SDK: hypothesis) | thin wrappers of every `__sceSas*` import |
+| 0x1AF818-0x1BA6D0 | C library (reentrancy, stdio, locale, number formatting) | `_getmodreent`, `libc:%s: no reent structure`, `C-UTF-8`, `Infinity`, `e%ld` |
+| 0x1BA6D0-0x1E3294 | inline functions and template instances (`.gnu.linkonce.t.*` placed after the rest: hypothesis) | tiny game getters returning names (`menu_theme`, capture names in near-alphabetical class order), Bullet `btAlignedObjectArray` templates (`./LinearMath/btAlignedAllocator.h`), SDK calls of the game (`sceNpRoster*`, `sceG729*`) |
+
+Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
+0x1ACE24-0x1AF818) hold more library code without telling strings. Next: refine
+each bound (alignment padding, call graph), identify the unidentified ranges, and
+compare `UCUS98746`.

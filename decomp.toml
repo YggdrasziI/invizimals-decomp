@@ -30,6 +30,22 @@ flags = "-O2 -G0"
 compile = "{cc} -c {flags} -Iinclude -Isrc -o {obj} {src}"
 target = "build/{version}/asm/{version}/eboot/{piece}.s.o"
 
+# Code regions of the progress card (tools/common/progress_badges.py), grouped from
+# the region map of notes/SPLITS.md (bounds approximate, library names from strings
+# of the binary)
+[regions.UCES01241]
+"Start-up" = [[0x30, 0x51C]]
+"Game" = [[0x51C, 0x133CCC]]
+"C++ demangler" = [[0x133CCC, 0x139438]]
+"Unidentified" = [[0x139438, 0x13A2C0]]
+"Bullet Physics" = [[0x13A2C0, 0x17661C]]
+"expat 2.0.0" = [[0x17661C, 0x1901B8]]
+"SDK and runtime libraries" = [[0x1901B8, 0x1BA6D0]]
+"Inline functions and templates" = [[0x1BA6D0, 0x1E3294]]
+
+[progress]
+region_note = "region bounds are approximate (notes/SPLITS.md)"
+
 # tools/common/report_diff.py: units that hold the code not yet in a source file
 [report]
 auto_units = ["asm/"]
