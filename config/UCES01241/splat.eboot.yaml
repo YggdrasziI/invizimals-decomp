@@ -69,7 +69,7 @@ segments:
       - [0x1E44B4, rodata, scenid]         # .rodata.sceNid
       - [0x1E4A04, rodata, ctors]          # .ctors .dtors .jcr
       - [0x1E4BDC, rodata, eh_frame]       # .eh_frame .gcc_except_table
-      - [0x20B840, rodata, rodata]         # .rodata .rodata.0001-0104, padding
+      - [0x20B840, rodata, rodata]         # .rodata .rodata.0001-0106, padding
 
   # Program header 1
   - name: data

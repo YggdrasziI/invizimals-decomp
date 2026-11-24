@@ -36,7 +36,7 @@ ISO SHA-1).
 | Target module | `EBOOT.BIN` decrypted: `orig/UCES01241/EBOOT.PRX`, 3231028 bytes, SHA-1 `4868a1538f992a1a6f2c575ddc51f81778932bd2` | `config/UCES01241/build.sha1` |
 | Module | name `Invizimals`, version 1.1, attributes 0 | `.rodata.sceModuleInfo` |
 | Format | relocatable PRX (ELF type 0xFFA0, flags 0x10A23001, entry 0x114), 3 program headers (the third holds the relocation tables), 253 section headers | `tools/psp/prx_info.py` |
-| Program header 0 | file 0xC0, vram 0x0, 0x243750 bytes: `.init`, `.text` 0x30-0x1E3294, `.fini`, `.sceStub.text`, `.lib.*`, `.rodata.sce*`, `.ctors`, `.dtors`, `.jcr`, `.eh_frame`, `.gcc_except_table`, `.rodata` and `.rodata.0001`-`.0104` | section headers |
+| Program header 0 | file 0xC0, vram 0x0, 0x243750 bytes: `.init`, `.text` 0x30-0x1E3294, `.fini`, `.sceStub.text`, `.lib.*`, `.rodata.sce*`, `.ctors`, `.dtors`, `.jcr`, `.eh_frame`, `.gcc_except_table`, `.rodata` and `.rodata.0001`-`.0106` | section headers |
 | Program header 1 | file 0x243840, vram 0x243780, 0x4A18 bytes in the file, 0x40FEF0 in memory: `.data`, `.data.0001`, `.sbss` (empty), `.bss`, `.bss.0001`, `.bss.0002`; `$gp` = module info 0xCA10 + segment base = 0x250190 (`.sbss` + 0x7FF0) | section headers, module info |
 | Entry | `module_start` 0x114, `module_stop` 0x4EC | `.lib.ent` (standard SDK export NIDs) |
 | Imports | 42 system libraries, 340 functions (4 NIDs without a known name) | `.lib.stub`, `config/UCES01241/symbol_addrs.eboot.txt` |
