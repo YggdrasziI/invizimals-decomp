@@ -23,7 +23,7 @@ decrypts it, and the build rebuilds that decrypted file):
 
 Version   | Release | ISO SHA1 | Built decrypted `EBOOT.BIN` SHA1
 --------- | ------- | -------- | --------------------------------
-UCES01241 | Invizimals (Europe, 13 languages), `DISC_VERSION 1.00` | `5a0a24e2d45db3da573a97ae1a86ce3ea59f6fa7` | `4868a1538f992a1a6f2c575ddc51f81778932bd2`
+UCES01241 | Invizimals (Europe), `DISC_VERSION 1.00` | `5a0a24e2d45db3da573a97ae1a86ce3ea59f6fa7` | `4868a1538f992a1a6f2c575ddc51f81778932bd2`
 UCUS98746 | Invizimals (USA), `DISC_VERSION 1.02` | `836f5df73c145b58bc02bfb24a8340d86f7bcb93` | `5beefc7bdad3c43dbe3bf271de00e1a43b048118`
 
 The work targets `UCES01241`; `UCUS98746` is paused: its all-assembly build matches,
