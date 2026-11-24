@@ -48,7 +48,11 @@ One case remains (`config/UCES01241/symbol_addrs.txt`): `swc1 $f0, -0x3874($s1)`
 0xF4460 is not relocated (the override is right), yet spimdisasm still creates a data
 symbol at 0xC78C, a branch target inside `func_0000C6D0`. The branch then refers to
 `.L0000C78C` while the label is emitted as `D_0000C78C`, and the link fails. Naming
-the address (`lbl_0000C78C`, `type:label`) gives both the same name.
+the address (`lbl_0000C78C`, `type:label`) gives both the same name. `UCUS98746` has
+the same case 8 bytes lower: `swc1 $f0, -0x387C($s1)` at 0xF9DE8 and the `bnez` at
+0xC764 both point at 0xC784 (`lbl_0000C784` in `config/UCUS98746/symbol_addrs.txt`).
+Adding a version: write its `splat.eboot.yaml` from `tools/psp/prx_info.py`, run
+`prx_symbols.py`, split, `reloc_overrides.py`, split again, then name such labels.
 
 ## Imports and exports
 

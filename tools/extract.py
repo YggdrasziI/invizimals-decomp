@@ -24,6 +24,10 @@ VERSIONS = {
         "iso_sha1": "5a0a24e2d45db3da573a97ae1a86ce3ea59f6fa7",
         "files": {"PSP_GAME/SYSDIR/EBOOT.BIN": "EBOOT.PRX"},
     },
+    "UCUS98746": {
+        "iso_sha1": "836f5df73c145b58bc02bfb24a8340d86f7bcb93",
+        "files": {"PSP_GAME/SYSDIR/EBOOT.BIN": "EBOOT.PRX"},
+    },
 }
 
 

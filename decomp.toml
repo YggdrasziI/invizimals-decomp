@@ -5,6 +5,7 @@ title = "Invizimals"
 # First one is the default version
 versions = [
     "UCES01241",  # Europe (13 languages), DISC_VERSION 1.00
+    "UCUS98746",  # USA, DISC_VERSION 1.02 (paused: all-assembly build only)
 ]
 
 binutils_prefix = "mips-ps2-decompals-"

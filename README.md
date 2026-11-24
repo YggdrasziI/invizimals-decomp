@@ -17,15 +17,25 @@ Portable, built with [splat](https://github.com/ethteck/splat).
 This repository does **not** contain any game assets or assembly whatsoever. An
 existing copy of the game is required.
 
-It builds the following modules:
+Supported versions (the ISO is the only input; `PSP_GAME/SYSDIR/BOOT.BIN` is zeroed on
+these discs, so `tools/extract.py` takes `PSP_GAME/SYSDIR/EBOOT.BIN` out of it and
+decrypts it, and the build rebuilds that decrypted file):
 
-Version   | Module | SHA1 hash of the input
---------- | ------ | ------------------------------------------
-UCES01241 | ISO (Europe, 13 languages, `DISC_VERSION 1.00`) | `5a0a24e2d45db3da573a97ae1a86ce3ea59f6fa7`
-UCES01241 | `SYSDIR/EBOOT.BIN`, decrypted | `4868a1538f992a1a6f2c575ddc51f81778932bd2`
+Version   | Release | ISO SHA1 | Built decrypted `EBOOT.BIN` SHA1
+--------- | ------- | -------- | --------------------------------
+UCES01241 | Invizimals (Europe, 13 languages), `DISC_VERSION 1.00` | `5a0a24e2d45db3da573a97ae1a86ce3ea59f6fa7` | `4868a1538f992a1a6f2c575ddc51f81778932bd2`
+UCUS98746 | Invizimals (USA), `DISC_VERSION 1.02` | `836f5df73c145b58bc02bfb24a8340d86f7bcb93` | `5beefc7bdad3c43dbe3bf271de00e1a43b048118`
 
-The disc's `SYSDIR/BOOT.BIN` is zeroed, so the target is the encrypted
-`SYSDIR/EBOOT.BIN` after decryption (`tools/extract.py`).
+The work targets `UCES01241`; `UCUS98746` is paused: its all-assembly build matches,
+nothing more is done on it for now.
+
+Progress
+========
+
+| Release | Disc ID | Progress |
+|---|---|---|
+| Invizimals (Europe) | `UCES01241` | not measured yet (no C yet) |
+| Invizimals (USA) | `UCUS98746` | not measured yet (paused) |
 
 Dependencies
 ============
@@ -48,18 +58,19 @@ Dependencies
 Building
 ========
 
-1. Copy the ISO to `orig/UCES01241/` (any file name ending in `.iso`).
+1. Copy the ISO to `orig/<version>/` (any file name ending in `.iso`).
 2. Run:
 
    ```
    git submodule update --init
-   python tools/extract.py
-   python tools/configure.py
+   python tools/extract.py --version <version>
+   python tools/configure.py --version <version>
    ninja
    ```
 
-   A build ends with `build/UCES01241/EBOOT.PRX: OK`.
-3. `ninja report` writes the objdiff report (`build/UCES01241/report.json`);
+   A build ends with `build/<version>/EBOOT.PRX: OK`. The version defaults to
+   `UCES01241`.
+3. `ninja report` writes the objdiff report (`build/<version>/report.json`);
    `objdiff.json` is there for the objdiff GUI.
 
 Documentation

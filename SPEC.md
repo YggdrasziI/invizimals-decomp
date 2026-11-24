@@ -8,7 +8,24 @@ identical byte for byte to the original (decrypted) file.
 
 Out of scope: a port, game assets, any redistribution of game files.
 
-## Target
+## Versions
+
+| Version | Release | Status |
+|---|---|---|
+| `UCES01241` | Europe (13 languages), `DISC_VERSION 1.00`, `PSP_SYSTEM_VER 6.00` | active |
+| `UCUS98746` | USA, `DISC_VERSION 1.02`, `PSP_SYSTEM_VER 6.20`, `APP_VER 01.00` | paused: all-assembly build matches |
+
+Each version has its own `config/<version>/` and `orig/<version>/`; decompilation
+work targets the European one.
+
+| Version | ISO SHA-1 | Decrypted `EBOOT.BIN` | Notes |
+|---|---|---|---|
+| `UCUS98746` | `836f5df73c145b58bc02bfb24a8340d86f7bcb93` (1615003648 bytes) | 3281928 bytes, SHA-1 `5beefc7bdad3c43dbe3bf271de00e1a43b048118` | `BOOT.BIN` zeroed; `EBOOT.BIN` 3282272 bytes, tag `0xD91613F0`. Entry 0x108, `.text` 0x24-0x1EA798 (0x7510 bytes longer), program header 1 at vram 0x24CA00, `$gp` 0x259450, 43 import libraries (345 functions: `sceGameUpdate` added), one `.bss.NNNN` fewer. `.comment`: the same GCC 4.0.4 (psp-2.9.0, psp-2.7.3) and PSPDEV 4.0.2 strings, but `GCC: (GNU) 3.3.6+allegrex-2.2.2-psp-1.20.1.internal` instead of `psp-1.15.3.internal` (an object built with a newer SDK, probably a library: hypothesis) |
+
+The two USA dumps named "(En,Fr,Es)" and "(En,Fr,Es,Pt)" are the same file (same
+ISO SHA-1).
+
+## Target (UCES01241)
 
 | Item | Value | Evidence |
 |---|---|---|

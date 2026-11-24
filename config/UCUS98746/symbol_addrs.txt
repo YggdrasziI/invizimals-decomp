@@ -1,0 +1,8 @@
+// Hand-written symbols (name = address; // attributes). Each needs evidence:
+// notes/SPLITS.md, notes/PRX.md. Generated symbols: symbol_addrs.eboot.txt.
+
+// Branch target of the bnez at 0xC764 that a constant offset (swc1 -0x387C($s1) at
+// 0xF9DE8, no relocation) also points at: without a name the branch label and
+// the guessed data symbol disagree and the link fails (notes/PRX.md; UCES01241:
+// lbl_0000C78C)
+lbl_0000C784 = 0x0000C784; // type:label
