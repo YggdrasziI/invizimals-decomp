@@ -34,8 +34,15 @@ Progress
 
 | Release | Disc ID | Progress |
 |---|---|---|
-| Invizimals (Europe) | `UCES01241` | first function in C (32 bytes); no progress card yet |
+| Invizimals (Europe) | `UCES01241` | [![Fuzzy](progress/UCES01241/fuzzy.svg)](notes/PROGRESS.md) [![Perfect](progress/UCES01241/perfect.svg)](notes/PROGRESS.md) [![Linked](progress/UCES01241/linked.svg)](notes/PROGRESS.md) |
 | Invizimals (USA) | `UCUS98746` | not measured yet (paused) |
+
+[![Progress card](progress/UCES01241/card.svg)](notes/PROGRESS.md)
+
+`EBOOT.BIN` only (the only code module on the disc). After `ninja report`,
+`python tools/common/progress_badges.py --record` redraws `progress/UCES01241/` and adds
+the current commit to `progress/UCES01241/history.csv`; `notes/PROGRESS.md` logs the
+milestones. Region bounds are approximate (`notes/SPLITS.md`).
 
 Dependencies
 ============
