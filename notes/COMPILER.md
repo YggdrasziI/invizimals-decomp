@@ -97,6 +97,17 @@ matches with `4.0.4h` but not `4.0.4c` would say so.
 and the probe gives 12/12 locally. The CI build job builds it on a cache miss, checks
 the fingerprint and runs the probe on every push.
 
+### Stack alignment: `-mpreferred-stack-boundary=4`
+
+2026-11-24. Every stack frame of the game (2831 functions below 0x133CCC), of Bullet,
+of the libraries and of the tail is a multiple of 16 bytes, and the floating-point
+save area starts on a 16-byte boundary (`swc1 $f20, 0x10($sp)` after `$ra` and `$s0`
+at 0x4 and 0x0). The kit's builds default to 8 bytes (EABI), so `4.0.4c` gives a
+0x10-byte frame with `$f20` at 0x8 for the same function. `-mpreferred-stack-boundary=4`
+(an option of these builds) gives the original layout; the twelve probes stay
+identical with it. expat's frames are 8-aligned (59 of 110): the stock PSPDEV build
+there keeps its default.
+
 ## expat 2.0.0: the stock PSPDEV GCC 4.0.2
 
 2026-11-24. The upstream sources of expat 2.0.0 (`src/expat`, unmodified), compiled at

@@ -63,7 +63,7 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
 - Compiler: the `.comment` strings name Sony's GCC 4.0.4 allegrex (psp-2.9.0 and
   psp-2.7.3), GCC 3.3.6 and PSPDEV GCC 4.0.2. Sony's builds are not available; an
   open-source GCC 4.0.4 rebuilt with the pspdev Allegrex patch and the LBP-PSP-Decomp
-  tuning (`4.0.4c`) at `-O2 -G0` reproduces all twelve probe functions
+  tuning (`4.0.4c`) at `-O2 -G0 -mpreferred-stack-boundary=4` reproduces all twelve probe functions
   (`notes/COMPILER.md`). It is the `[compiler]` of `decomp.toml`: a Linux program in
   `~/lbp-gcc4/psp-gcc-4.0.4c`, built from source by the kit (CI: cached), run through
   WSL on Windows (`tools/common/linux_run.py`). expat 2.0.0 (`src/expat`) was built

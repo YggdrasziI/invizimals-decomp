@@ -18,12 +18,13 @@ splat = "splat.eboot.yaml"
 relocatable = true
 
 # GCC 4.0.4 built from GNU sources with the Allegrex patch and tuning of the
-# LBP-PSP-Decomp kit (build 4.0.4c): 12/12 on the probes at -O2 -G0
+# LBP-PSP-Decomp kit (build 4.0.4c): 12/12 on the probes at -O2 -G0; every stack
+# frame of the game is 16-aligned, hence -mpreferred-stack-boundary=4
 # (notes/COMPILER.md). A Linux program, run through WSL on Windows.
 [compiler]
 name = "psp-gcc-4.0.4c"
 linux = "~/lbp-gcc4/psp-gcc-4.0.4c/bin/psp-gcc"
-flags = "-O2 -G0"
+flags = "-O2 -G0 -mpreferred-stack-boundary=4"
 
 # expat 2.0.0 (src/expat, upstream sources unmodified) was built with the stock PSPDEV
 # GCC 4.0.2, not with the game's compiler (notes/COMPILER.md)
