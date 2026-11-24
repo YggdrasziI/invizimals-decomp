@@ -1,0 +1,115 @@
+name: Compiler probe (GCC 4.0.x)
+
+# Manual run: build open-source GCC 4.0.x PSP cross compilers (GNU release tarballs +
+# the pspdev/ps2dev Allegrex patch) with the build kit of Jstar269/LBP-PSP-Decomp at a
+# pinned commit (GPL-3.0; downloaded and run, nothing of it is kept in this repository),
+# then compile a probe file and compare each func_XXXXXXXX with the decrypted EBOOT
+# (tools/psp/compiler_probe.py). The log shows OK/DIFF per function and the probe's own
+# disassembly, no game bytes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      builds:
+        description: kit builds, separated by spaces (4.0.2h 4.0.2x 4.0.4h 4.0.4x 4.0.4c 4.1.0s)
+        default: 4.0.2h 4.0.4h 4.0.4c
+      probe:
+        description: probe source
+        default: tools/probes/gcc_leaf.c
+      flags:
+        description: flag sets, separated by ';'
+        default: -O2 -G0;-Os -G0;-O2 -G0 -ffast-math;-Os -G0 -ffast-math
+
+env:
+  KIT_REPO: https://github.com/Jstar269/LBP-PSP-Decomp.git
+  KIT_COMMIT: 754764d14759c58969bfe29cdc9ab5346255b7ee
+  # pspdev release the kit's recorded builds used (psp-ld is configured into the driver)
+  PSPDEV_URL: https://github.com/pspdev/pspdev/releases/download/v20261001/pspdev-ubuntu-latest-x86_64.tar.gz
+  LBP_GCC4_ROOT: /opt/lbp-gcc4
+  LBP_GCC4_DL: /tmp/gcc4-dl
+  LBP_GCC4_WORK: /tmp/gcc4-work
+
+jobs:
+  probe:
+    # private build container (YggdrasziI/invizimals-decomp-build): game files in /orig
+    container:
+      image: ghcr.io/yggdraszii/invizimals-decomp-build:main
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: |
+          cp -a /orig/. ./orig/
+          pip install -r tools/requirements.txt
+          python tools/configure.py
+          ninja
+
+      - name: Host packages
+        run: |
+          # the Sony assembler is a 32-bit x86 program
+          dpkg --add-architecture i386
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends libc6:i386 file build-essential patch bzip2 \
+            gpgv wget libgmp-dev libmpfr-dev bison flex texinfo >/dev/null
+
+      # The Sony binutils 2.14 assembler of the decomp.me psp-gcc-1.3.1 kit, at the path
+      # the kit's sony-as wrapper runs (configured into the compilers' driver)
+      - name: Sony assembler
+        run: |
+          python tools/psp/download_tool.py compiler psp-gcc-1.3.1 --path "$HOME/hst-gcc/psp-gcc-1.3.1"
+          chmod -R u+x "$HOME/hst-gcc/psp-gcc-1.3.1"
+          "$HOME/hst-gcc/psp-gcc-1.3.1/psp/bin/as" --version | head -n 1
+
+      - name: Build kit
+        run: |
+          git init -q /opt/kit
+          git -C /opt/kit remote add origin "$KIT_REPO"
+          git -C /opt/kit fetch -q --depth 1 origin "$KIT_COMMIT"
+          git -C /opt/kit checkout -q FETCH_HEAD -- toolchain/gcc4
+
+      - name: Cache compilers
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/lbp-gcc4
+          key: gcc4-${{ env.KIT_COMMIT }}-${{ inputs.builds }}
+
+      - name: Build compilers
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /opt/pspdev
+          wget -q -O /tmp/pspdev.tar.gz "$PSPDEV_URL"
+          tar -xzf /tmp/pspdev.tar.gz -C /opt/pspdev --strip-components=1
+          export PSPDEV_BIN=/opt/pspdev/bin
+          JOBS=$(nproc) sh /opt/kit/toolchain/gcc4/build.sh ${{ inputs.builds }}
+
+      - name: Probe
+        env:
+          BUILDS: ${{ inputs.builds }}
+          PROBE: ${{ inputs.probe }}
+          FLAGS: ${{ inputs.flags }}
+        run: |
+          for b in $BUILDS; do
+            cc="$LBP_GCC4_ROOT/psp-gcc-$b/bin/psp-gcc"
+            echo "##### psp-gcc-$b: $("$cc" --version | head -n 1)"
+            IFS=';'
+            for f in $FLAGS; do
+              echo "=== $b $f"
+              IFS=' '
+              python tools/psp/compiler_probe.py "$PROBE" --cc "$cc" -- $f || true
+              echo "::group::disassembly ($b $f)"
+              tools/binutils/mips-ps2-decompals-objdump -d --no-show-raw-insn "${PROBE%.*}.o" || true
+              echo "::endgroup::"
+              IFS=';'
+            done
+            IFS=' '
+          done
