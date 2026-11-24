@@ -89,6 +89,14 @@ Open: whether `4.0.4c`'s LBP-specific changes (block-copy loop order, `ins`) als
 hold for this game: they only matter once a function uses them. A function that
 matches with `4.0.4h` but not `4.0.4c` would say so.
 
+Open: block copies of unknown alignment. The original tests the alignment at run
+time before a copy loop (`or $v0, <src>, <dst>`, `andi $v0, $v0, 0x3`, `beqz`): one
+loop with `lwl`/`lwr` (or `swl`/`swr`), the other with `lw`/`sw`. 16 copies have it:
+13 in the game's code (first at 0x2DB48, in `func_0002DACC`), 2 in Bullet (0x152D9C,
+in `func_00152B28`) and 1 after it (0x1C7B20). No build of the kit emits the test:
+`4.0.4c` gives the unaligned loop only. A function with such a copy cannot match until
+the compiler change behind it is found.
+
 ### Adopted
 
 2026-11-24: `4.0.4c` at `-O2 -G0` is the `[compiler]` of `decomp.toml`. Built in WSL
