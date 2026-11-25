@@ -103,3 +103,11 @@ into GCC 4.0.4 (`toolchain/gcc4/patches/allegrex-sched.md`, GPL-3.0-or-later, co
 `754764d14759`): written for this project, marked GPL-3.0-or-later, it appends six
 reservations (instruction latencies). The kit is not copied into the repository; `tools/gcc/build_404a.sh` applies the diff to the
 kit's work tree.
+
+## GCC change (`tools/gcc/branch-cost-4.0.4.diff`)
+
+A diff of `gcc/config/mips/mips.h` of GCC 4.0.4 (GPL-2.0-or-later) as the
+LBP-PSP-Decomp kit patches it (GPL-3.0-or-later, commit `754764d14759`): written for
+this project, marked GPL-3.0-or-later, it changes one macro (`BRANCH_COST` for the
+Allegrex). Neither GCC nor the kit is copied into the repository;
+`tools/gcc/build_404a.sh` applies the diff to the kit's work tree.

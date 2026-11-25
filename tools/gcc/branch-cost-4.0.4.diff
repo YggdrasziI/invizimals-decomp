@@ -1,0 +1,24 @@
+SPDX-License-Identifier: GPL-3.0-or-later
+Branch cost of the game's retail compiler (notes/COMPILER.md, "Branch cost"), for the
+build psp-gcc-4.0.4a: the LBP-PSP-Decomp kit's psp-gcc-4.0.4c work tree plus this diff,
+block-move-4.0.4.diff and allegrex-sched-4.0.4.diff (tools/gcc/build_404a.sh). Applies
+with `patch -p1` in gcc-4.0.4/ after the kit's diffs.
+In config/mips/mips.h, BRANCH_COST is 3 when tuning for the Allegrex (the kit: 2). The
+if-conversion pass then moves a block of two register loads before the branch that
+skips it. The value gives the most functions of the game's Bullet library byte for
+byte, with none lost (2: 520, 3: 528, 4: 525 with two lost).
+GCC code is GPL-2.0-or-later (GCC 4.0.4) and the kit's context GPL-3.0-or-later.
+--- a/gcc/config/mips/mips.h
++++ b/gcc/config/mips/mips.h
+@@ -2656,9 +2656,8 @@
+ 
+ /* ??? Fix this to be right for the R8000.  */
+ #define BRANCH_COST							\
+-  ((! TARGET_MIPS16							\
+-    && (TUNE_MIPS4000 || TUNE_MIPS6000 || TUNE_ALLEGREX))				\
+-   ? 2 : 1)
++  (TUNE_ALLEGREX ? 3 /* game: the retail compiler's value */		\
++   : (! TARGET_MIPS16 && (TUNE_MIPS4000 || TUNE_MIPS6000)) ? 2 : 1)
+ 
+ /* If defined, modifies the length assigned to instruction INSN as a
+    function of the context in which it is used.  LENGTH is an lvalue

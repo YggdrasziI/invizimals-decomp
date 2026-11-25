@@ -161,6 +161,22 @@ function changes (12/12). Adopted in build `4.0.4a`:
 block-copy diff. Scheduler options (`-fno-sched-*`, `-fsched2-use-*`) do not help
 the near misses that remain.
 
+**Branch cost** (2026-11-25). `BRANCH_COST` (`config/mips/mips.h`) is 2 for the
+Allegrex in the kit; the retail compiler behaves as with 3. The if-conversion pass
+moves a block before the branch that skips it when the block costs less than
+`BRANCH_COST` instructions (`ifcvt.c`, `find_if_case_1` / `find_if_case_2`), so with 3
+a block of two register loads goes before the branch. Proof: `btBoxShape::getEdge`
+(0x1D95FC, an inline function of `btBoxShape.h`) loads `edgeVert0 = 0` and
+`edgeVert1 = 0` in the entry block, before the `beqz` of the `switch` bounds test;
+with 2 they stay in a block after the jump. No flag gives it (`-fno-tree-ccp
+-fno-tree-dominator-opts` comes within two instructions and loses 243 functions).
+On the Bullet sweep, 2: 520 identical of 994; 3: 528, none lost; 4: 525, two lost.
+The eight gained include the near misses that scheduling did not explain:
+`btConvexConvexAlgorithm::processCollision` and `calculateTimeOfImpact`,
+`btQuantizedBvh::updateSubtreeHeaders` and `deSerializeInPlace`. Adopted in build
+`4.0.4a`: `tools/gcc/branch-cost-4.0.4.diff`. Not explored: values per optimisation
+level or for other costs (`mips_rtx_costs`).
+
 ### Adopted
 
 2026-11-24: `4.0.4c` at `-O2 -G0` is the `[compiler]` of `decomp.toml`. Built in WSL
