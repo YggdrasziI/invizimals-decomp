@@ -1,3 +1,7 @@
+/* Altered source version, not the original Bullet file: changed for the build of
+   the game (see notes/PROVENANCE.md). btQuantizedBvhNode is not declared
+   ATTRIBUTE_ALIGNED16. */
+
 /*
 Bullet Continuous Collision Detection and Physics Library
 Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
@@ -42,7 +46,8 @@ subject to the following restrictions:
 
 ///btQuantizedBvhNode is a compressed aabb node, 16 bytes.
 ///Node can be used for leafnode or internal node. Leafnodes can point to 32-bit triangle index (non-negative range).
-ATTRIBUTE_ALIGNED16	(struct) btQuantizedBvhNode
+//ATTRIBUTE_ALIGNED16	(struct) btQuantizedBvhNode
+struct btQuantizedBvhNode
 {
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 

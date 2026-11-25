@@ -71,6 +71,11 @@ each change is a reconstruction from the game's code, not a copy of other code:
 - `LinearMath/btAlignedAllocator.h`: `btAlignedAlloc` and `btAlignedFree` call the
   game's allocator (0xBDE8 with alignment, size and the calling file's name, 0xBE04),
   as every Bullet function of the game does.
+- `BulletCollision/BroadphaseCollision/btQuantizedBvh.h`: `btQuantizedBvhNode`
+  without `ATTRIBUTE_ALIGNED16` (the upstream declaration, commented out there):
+  `btOptimizedBvh::build` (0x14E194) keeps a temporary of that type at `sp+0x14`,
+  which a 16-byte aligned type cannot have; with the change the function is
+  identical and no other function of the library changes.
 
 Written for this project: `include/cxx/` (minimal C and C++ declarations for Bullet;
 `new` declares `std::exception`, `std::bad_alloc` and the global allocation functions
