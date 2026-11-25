@@ -43,7 +43,7 @@ only where a string gives one.
 | 0x51C-0x133CCC | Game (Novarama) | C++ (FDEs), strings of the game's classes (`CMemMngr`, `CResourcesMngr`, `TCapture*`, `TVideo`), its asset paths; ends with the MPEG/JPEG wrappers (`sceMpeg*` messages, 0x131C64-0x133B58) |
 | 0x133CCC-0x139438 | C++ demangler (libiberty `cp-demangle`, from libsupc++: hypothesis) | 39 functions without FDE using `_GLOBAL_`, `string literal`, `reference temporary for `, ` restrict` |
 | 0x139438-0x13A2C0 | unidentified | small C++ functions (FDEs), no strings |
-| 0x13A2C0-0x17864C | Bullet Physics | source paths `BulletCollision/...cpp`, `BulletDynamics/...cpp`, `./LinearMath/btAlignedAllocator.h` referenced in address order from 0x13A2C0 to 0x174200; the floating-point functions 0x176634-0x17864C are Bullet's `btContactConstraint.cpp` (`resolveSingleBilateral`, `resolveSingleCollision*`, `resolveSingleFriction*`: 42-63 % by content, compiled from 2.71 with the VFPU `LinearMath`); end: the start of `xmlparse.c` |
+| 0x13A2C0-0x17864C | Bullet Physics | source paths `BulletCollision/...cpp`, `BulletDynamics/...cpp`, `./LinearMath/btAlignedAllocator.h` referenced in address order from 0x13A2C0 to 0x174200; the floating-point functions 0x176634-0x17864C are Bullet's `btContactConstraint.cpp` (`resolveSingleBilateral`, `resolveSingleCollision*`, `resolveSingleFriction*`, now linked from source); end: the start of `xmlparse.c` |
 | 0x17864C-0x18DE70 | expat 2.0.0 (C) | no FDEs; `expat_2.0.0` (0x179384), `xmlparse.c` assertion (0x178FE8), XML namespace URIs and DTD keywords (0x1797B8-0x18DA8C); start: the first function of `xmlparse.c` (by content); end: the only alignment padding of `.text` (3 nops at 0x18DE64) |
 | 0x18DE70-0x18E430 | inflate routine, hand-written assembly (SDK deflate library: hypothesis) | 16-aligned after the padding; one routine that splat splits at its inner entries (`rotrv`, temporaries only, 0x380-byte frame); its only caller, 0x1AC080, checks a zlib header (`CMF & 0xF == 8`, `FDICT`) and returns SDK-style error codes (`0x80000004`) |
 | 0x18E430-0x18FE78 | libgcc soft-float double (`fp-bit` / `dp-bit`: hypothesis) | no FDEs; arguments packed on the stack and unpacked by shared helpers; 0x18E6B4 has 600 callers (float to double, as every `printf` of a float needs), 0x18EA3C / 0x18EAB4 / 0x18EB20 have 125 / 130 / 188 (add, sub, mul), then seven functions of one shape (the seven comparisons); called mostly from the C library |
@@ -112,13 +112,16 @@ to it.
 | 0x145360-0x1456CC | `btCollisionShape.cpp` | identical, linked from source |
 | 0x146658-0x146C1C | `btConvexInternalShape.cpp` | identical, linked from source |
 | 0x146C1C-0x147468 | `btCylinderShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20AFFB; its copies of `btBoxShape::getPreferredPenetrationDirection` / `getPlaneEquation` are the discarded ones) |
+| 0x14E870-0x14F17C | `btPolyhedralConvexShape.cpp` | identical, linked from source (`getAabb` since the compiler's pseudo register numbers, notes/COMPILER.md) |
 | 0x14F17C-0x14F4E8 | `btSphereShape.cpp` | identical, linked from source |
 | 0x14F4E8-0x14FA60 | `btStaticPlaneShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20B118) |
 | 0x1501AC-0x15020C | `btTriangleCallback.cpp` | identical, linked from source |
+| 0x15020C-0x150AAC | `btTriangleMeshShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20B150; `getAabb` since the compiler's pseudo register numbers) |
 | 0x15183C-0x15186C | `btConvexCast.cpp` | identical, linked from source |
 | 0x15186C-0x151954 | `btGjkEpaPenetrationDepthSolver.cpp` | identical, linked from source |
 | 0x15256C-0x153080 | `btPersistentManifold.cpp` | identical, linked from source (`.data` 0x2479D4: `gContactBreakingThreshold`; `.bss` 0x62C668: `gContactProcessedCallback`, `gContactDestroyedCallback`) |
 | 0x153080-0x153B64 | `btRaycastCallback.cpp` | identical, linked from source (`.gcc_except_table` 0x20B1C4) |
+| 0x15CB88-0x15DC58 | `btPoint2PointConstraint.cpp` | identical, linked from source (`buildJacobian` since the compiler's pseudo register numbers) |
 | 0x16392C-0x163CB8 | `btTypedConstraint.cpp` | identical, linked from source (`.ctors` 0x1E4A54, `.dtors` 0x1E4B10, `.gcc_except_table` 0x20B25E, `.bss` 0x64C680: `static btRigidBody s_fixed`) |
 | 0x16AC90-0x16ACC0 | `btCollisionAlgorithm.cpp` | identical, linked from source |
 | 0x16ACC0-0x16ACF0 | `btDispatcher.cpp` | identical, linked from source |
@@ -128,6 +131,7 @@ to it.
 | 0x17478C-0x1747EC | `btConcaveShape.cpp` | identical, linked from source |
 | 0x1747EC-0x174E40 | `btGjkConvexCast.cpp` | identical, linked from source (`.gcc_except_table` 0x20B718) |
 | 0x174E40-0x17662C | `btGjkEpa2.cpp` | identical, linked from source (`.rodata` 0x20E0D0, `.gcc_except_table` 0x20B732) |
+| 0x17662C-0x17864C | `btContactConstraint.cpp` | identical, linked from source (`resolveSingleBilateral` since the compiler's pseudo register numbers) |
 
 Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
 0x1ACE24-0x1AF818) hold more library code without telling strings; 0x1AC080, in the
