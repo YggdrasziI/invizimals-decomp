@@ -8,3 +8,21 @@ lbl_0000C78C = 0x0000C78C; // type:label
 
 // expat 2.0.0 (src/expat): xmlrole.c matches as a whole at 0x1805B8 (notes/SPLITS.md)
 XmlPrologStateInit = 0x00181F80; // type:func
+
+// Bullet (src/bullet): btCollisionObject.cpp matches as a whole at 0x13C7BC, its
+// typeinfo, name and vtable at 0x2414A0 and its .eh_frame at 0x2037F4 (notes/SPLITS.md);
+// the C++ runtime symbols its object refers to, at the addresses its bytes need
+_ZN17btCollisionObjectD0Ev = 0x0013C7BC; // type:func
+_ZN17btCollisionObject18setActivationStateEi = 0x0013C7CC; // type:func
+_ZN17btCollisionObject20forceActivationStateEi = 0x0013C7E8; // type:func
+_ZN17btCollisionObjectD2Ev = 0x0013C7F0; // type:func
+_ZN17btCollisionObjectD1Ev = 0x0013C800; // type:func
+_ZN17btCollisionObjectC1Ev = 0x0013C810; // type:func
+_ZN17btCollisionObjectC2Ev = 0x0013C8A0; // type:func
+_ZN17btCollisionObject8activateEb = 0x0013C930; // type:func
+_ZN17btCollisionObject24checkCollideWithOverrideEPS_ = 0x001D8540; // type:func
+_ZTI17btCollisionObject = 0x002414A0; // type:s32 size:0x8
+_ZTS17btCollisionObject = 0x002414A8; // type:asciz size:0x14
+_ZTV17btCollisionObject = 0x002414C0; // type:s32 size:0x18
+_ZTVN10__cxxabiv117__class_type_infoE = 0x00240CC0; // type:s32
+__gxx_personality_v0 = 0x001A5B98; // type:func

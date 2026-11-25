@@ -70,6 +70,20 @@ The upstream sources compiled with the stock PSPDEV GCC 4.0.2 at `-O2 -G0`, with
 | 0x1805B8-0x181F90 | `xmlrole.c` | identical as a whole file (`.text` 0x19D8 bytes, `.rodata` 0x324 bytes at 0x20E624); linked from source |
 | 0x181F90-0x18DE70 | `xmltok.c` | 97/102 functions identical; `normal_scanPi`, `little2_sameName` and the three `nameMatchesAscii` differ (block order, registers) |
 
+### Bullet files
+
+Trunk 66861ad3340a (2.71) with the game's `LinearMath` changes (`notes/PROVENANCE.md`),
+compiled with psp-gcc-4.0.4a at `-O3 -G0 -mpreferred-stack-boundary=4
+-fno-merge-constants -DNDEBUG` (`notes/COMPILER.md`), found by content in the original.
+A whole C++ file is linked with its pieces at their places: `.text`, its constants
+(`.rodata`), its out-of-line inline functions (`.gnu.linkonce.t.*`, in 0x1BA6D0+),
+its typeinfo, name and vtable (`.gnu.linkonce.r.*`) and its `.eh_frame` block (one CIE
+per object, then its FDEs).
+
+| Range | File | Status |
+|---|---|---|
+| 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical as a whole file; linked from source (constants 0x215B34, `checkCollideWithOverride` 0x1D8540, typeinfo/name/vtable 0x2414A0-0x2414D8, `.eh_frame` 0x2037F4-0x203820) |
+
 Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
 0x1ACE24-0x1AF818) hold more library code without telling strings; 0x1AC080, in the
 third, is the zlib-format decompressor that calls the inflate routine.

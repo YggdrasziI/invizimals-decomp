@@ -65,17 +65,30 @@ segments:
       - [0xC0, asm, text]                  # .init .text .fini
       - [0x18D90, c, unit_00018CD0]        # func_00018CD0 alone (bounds: hypothesis)
       - [0x18DB0, asm, text_00018CF0]
+      - [0x13C87C, cpp, bullet/BulletCollision/CollisionDispatch/btCollisionObject] # Bullet, whole file (notes/SPLITS.md)
+      - [0x13CA30, asm, text_0013C970]
       - [0x180678, c, expat/xmlrole]       # expat 2.0.0 xmlrole.c, whole file (notes/SPLITS.md)
       - [0x182050, asm, text_00181F90]
+      - { start: 0x1D8600, type: cpp, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .gnu.linkonce.t._ZN17btCollisionObject24checkCollideWithOverrideEPS_ }
+      - [0x1D8608, asm, text_001D8548]
       - [0x1E3370, asm, scestub]           # .sceStub.text (system imports)
       - [0x1E3E10, rodata, lib]            # .lib.ent*, .lib.stub*, .rodata.sceModuleInfo
       - [0x1E41AC, rodata, sceresident]    # .rodata.sceResident
       - [0x1E44B4, rodata, scenid]         # .rodata.sceNid
       - [0x1E4A04, rodata, ctors]          # .ctors .dtors .jcr
       - [0x1E4BDC, rodata, eh_frame]       # .eh_frame .gcc_except_table
+      - { start: 0x2038B4, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .eh_frame }
+      - [0x2038E0, rodata, eh_frame_00203820]
       - [0x20B840, rodata, rodata]         # .rodata .rodata.0001-0106, padding
       - [0x20E6E4, .rodata, expat/xmlrole]
       - [0x20EA08, rodata, rodata_0020E948]
+      - [0x215BF4, .rodata, bullet/BulletCollision/CollisionDispatch/btCollisionObject]
+      - [0x215C04, rodata, rodata_00215B44]
+      - [0x215C08, rodata, rodata_00215B48] # 8-aligned start: the file holds doubles
+      - { start: 0x241560, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .gnu.linkonce.r._ZTI17btCollisionObject }
+      - { start: 0x241568, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .gnu.linkonce.r._ZTS17btCollisionObject }
+      - { start: 0x241580, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .gnu.linkonce.r._ZTV17btCollisionObject }
+      - [0x241598, rodata, rodata_002414D8]
 
   # Program header 1
   - name: data
