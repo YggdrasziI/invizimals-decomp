@@ -79,7 +79,16 @@ content in the original. A whole C++ file is linked with its pieces at their pla
 out-of-line inline functions (`.gnu.linkonce.t.*`, in 0x1BA6D0+); its typeinfo, names
 and vtables (`.gnu.linkonce.r.*`, 0x2414xx-0x2436xx); its `.eh_frame` block (one CIE
 per object, then its FDEs) and its `.gcc_except_table`. A `.gnu.linkonce` section
-shared by several files is linked from the first one. The `.eh_frame` entry a later file
+shared by several files is linked from the first one. A later file's copy of such a function can
+be identical and still fail to place: it refers to its own file's constants or
+strings, and the kept copy to the first file's (`btCylinderShape.cpp`'s copy of
+`btBoxShape::getPreferredPenetrationDirection` loads from its own `.rodata.cst4`, the
+kept one at 0x1D9724 from `btBoxShape.cpp`'s at 0x215BD0). Such a section is the
+discarded duplicate; it does not keep the file from being linked. Two classes whose
+functions all look identical are not in the game: `btOdeJoint` and `btEmptyShape`
+(their typeinfo names `10btOdeJoint` / `12btEmptyShape` and the string `Empty` of
+`getName` are absent; their few-instruction constructors and destructors match other
+classes'). The `.eh_frame` entry a later file
 has for its own, discarded copy of such a function holds the kept copy's address
 (0x2053D8 in `btSphereShape.cpp`'s block: 0x1D0178, `btConvexShape::~btConvexShape`
 linked from `btCapsuleShape.cpp`): `linkonce_symbols` in `decomp.toml`. A file with a static
@@ -102,6 +111,7 @@ to it.
 | 0x1449BC-0x145360 | `btCapsuleShape.cpp` | identical, linked from source |
 | 0x145360-0x1456CC | `btCollisionShape.cpp` | identical, linked from source |
 | 0x146658-0x146C1C | `btConvexInternalShape.cpp` | identical, linked from source |
+| 0x146C1C-0x147468 | `btCylinderShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20AFFB; its copies of `btBoxShape::getPreferredPenetrationDirection` / `getPlaneEquation` are the discarded ones) |
 | 0x14F17C-0x14F4E8 | `btSphereShape.cpp` | identical, linked from source |
 | 0x14F4E8-0x14FA60 | `btStaticPlaneShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20B118) |
 | 0x1501AC-0x15020C | `btTriangleCallback.cpp` | identical, linked from source |
