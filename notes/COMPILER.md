@@ -169,8 +169,9 @@ the moves, `fcmp`, `fcvt`, `xfer`, `imul`, the loads split by kind, `arith`,
 (0x151954, 735 instructions) identical, but changes the order around `sqrt.s` in
 three inline functions of `btGjkEpa2.cpp` (0x1DE2C4, 0x1DE9B4, 0x1DF248) that are
 identical with 54; 25 and more keep those and lose the first. No single latency
-fits both: not adopted. The sweep only scores `.text` functions, so a change must
-also pass the full build (the inline functions of the linked files).
+fits both: not adopted. `library_sweep.py --inline 1BA6D0 1E3294` scores the inline
+functions too (1166 identical of 1695 with them, 547 of 994 in `.text` alone): use
+it for any compiler change.
 
 **Branch cost** (2026-11-25). `BRANCH_COST` (`config/mips/mips.h`) is 2 for the
 Allegrex in the kit; the retail compiler behaves as with 3. The if-conversion pass
