@@ -74,13 +74,13 @@ segments:
       - [0x142F34, cpp, bullet/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm]
       - [0x1433AC, cpp, bullet/BulletCollision/CollisionDispatch/btSphereTriangleCollisionAlgorithm]
       - [0x1438F4, cpp, bullet/BulletCollision/CollisionShapes/btBoxShape]
-      - [0x143BD4, asm, text_00143B14]
+      - [0x143BD4, cpp, bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape]
       - [0x144A7C, cpp, bullet/BulletCollision/CollisionShapes/btCapsuleShape]
       - [0x145420, cpp, bullet/BulletCollision/CollisionShapes/btCollisionShape]
       - [0x14578C, asm, text_001456CC]
       - [0x146718, cpp, bullet/BulletCollision/CollisionShapes/btConvexInternalShape]
       - [0x146CDC, cpp, bullet/BulletCollision/CollisionShapes/btCylinderShape]
-      - [0x147528, asm, text_00147468]
+      - [0x147528, cpp, bullet/BulletCollision/CollisionShapes/btOptimizedBvh]
       - [0x14E930, cpp, bullet/BulletCollision/CollisionShapes/btPolyhedralConvexShape]
       - [0x14F23C, cpp, bullet/BulletCollision/CollisionShapes/btSphereShape]
       - [0x14F5A8, cpp, bullet/BulletCollision/CollisionShapes/btStaticPlaneShape]
@@ -167,10 +167,13 @@ segments:
       - { start: 0x1D9F9C, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .gnu.linkonce.t._ZN10btBoxShape15setLocalScalingERK9btVector3 }
       - { start: 0x1DA0B0, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .gnu.linkonce.t._ZN10btBoxShapeD0Ev }
       - { start: 0x1DA0C0, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .gnu.linkonce.t._ZN10btBoxShapeD1Ev }
-      - { start: 0x1DA0D0, type: cpp, name: bullet/BulletCollision/CollisionShapes/btStaticPlaneShape, linker_section: .gnu.linkonce.t._ZNK14btConcaveShape9getMarginEv }
-      - { start: 0x1DA0D8, type: cpp, name: bullet/BulletCollision/CollisionShapes/btStaticPlaneShape, linker_section: .gnu.linkonce.t._ZN14btConcaveShape9setMarginEf }
-      - { start: 0x1DA0E0, type: cpp, name: bullet/BulletCollision/CollisionShapes/btTriangleMeshShape, linker_section: .gnu.linkonce.t._ZNK19btTriangleMeshShape37localGetSupportingVertexWithoutMarginERK9btVector3 }
-      - [0x1DA134, asm, text_001DA074]
+      - { start: 0x1DA0D0, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.t._ZNK14btConcaveShape9getMarginEv }
+      - { start: 0x1DA0D8, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.t._ZN14btConcaveShape9setMarginEf }
+      - { start: 0x1DA0E0, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.t._ZNK19btTriangleMeshShape37localGetSupportingVertexWithoutMarginERK9btVector3 }
+      - { start: 0x1DA134, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.t._ZN21btNodeOverlapCallbackD1Ev }
+      - { start: 0x1DA144, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.t._ZN21btNodeOverlapCallbackD0Ev }
+      - { start: 0x1DA154, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.t._ZNK22btBvhTriangleMeshShape12getShapeTypeEv }
+      - { start: 0x1DA15C, type: cpp, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.t._ZNK22btBvhTriangleMeshShape7getNameEv }
       - { start: 0x1DA168, type: cpp, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .gnu.linkonce.t._ZN21btConvexInternalShape9setMarginEf }
       - { start: 0x1DA170, type: cpp, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .gnu.linkonce.t._ZNK21btConvexInternalShape36getNumPreferredPenetrationDirectionsEv }
       - { start: 0x1DA178, type: cpp, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .gnu.linkonce.t._ZNK21btConvexInternalShape32getPreferredPenetrationDirectionEiR9btVector3 }
@@ -302,14 +305,13 @@ segments:
       - { start: 0x204130, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm, linker_section: .eh_frame }
       - { start: 0x20423C, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereTriangleCollisionAlgorithm, linker_section: .eh_frame }
       - { start: 0x20435C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .eh_frame }
-      - [0x2044B4, rodata, eh_frame_002043F4]
-      - [0x2044B8, rodata, eh_frame_002043F8]
+      - { start: 0x2044B4, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .eh_frame }
       - { start: 0x204750, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .eh_frame }
       - { start: 0x204918, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCollisionShape, linker_section: .eh_frame }
       - [0x2049A0, rodata, eh_frame_002048E0]
       - { start: 0x204B10, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btConvexInternalShape, linker_section: .eh_frame }
       - { start: 0x204BB0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCylinderShape, linker_section: .eh_frame }
-      - [0x204E28, rodata, eh_frame_00204D68]
+      - { start: 0x204E28, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .eh_frame }
       - { start: 0x20529C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btPolyhedralConvexShape, linker_section: .eh_frame }
       - { start: 0x2053F0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btSphereShape, linker_section: .eh_frame }
       - { start: 0x2054DC, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btStaticPlaneShape, linker_section: .eh_frame }
@@ -346,12 +348,11 @@ segments:
       - { start: 0x20AEB7, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereBoxCollisionAlgorithm, linker_section: .gcc_except_table }
       - { start: 0x20AF01, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm, linker_section: .gcc_except_table }
       - { start: 0x20AF49, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereTriangleCollisionAlgorithm, linker_section: .gcc_except_table }
-      - { start: 0x20AFA7, type: bin, name: eh_frame_0020AEE7, linker_section_order: .rodata }
-      - [0x20AFA8, rodata, eh_frame_0020AEE8]
+      - { start: 0x20AFA7, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gcc_except_table }
+      - { start: 0x20B089, type: bin, name: eh_frame_0020AFC9, linker_section_order: .rodata }
       - { start: 0x20B0B8, type: bin, name: eh_frame_0020AFF8, linker_section_order: .rodata }
       - { start: 0x20B0BB, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCylinderShape, linker_section: .gcc_except_table }
-      - { start: 0x20B11F, type: bin, name: eh_frame_0020B05F, linker_section_order: .rodata }
-      - [0x20B120, rodata, eh_frame_0020B060]
+      - { start: 0x20B11F, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gcc_except_table }
       - { start: 0x20B1D8, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btStaticPlaneShape, linker_section: .gcc_except_table }
       - [0x20B1FC, rodata, eh_frame_0020B13C]
       - [0x20B200, rodata, eh_frame_0020B140]
@@ -392,16 +393,14 @@ segments:
       - { start: 0x215C7C, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm, linker_section: .rodata.cst4 }
       - { start: 0x215C88, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereTriangleCollisionAlgorithm, linker_section: .rodata.cst4 }
       - { start: 0x215C90, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .rodata.cst4 }
-      - [0x215CA4, rodata, rodata_00215BE4]
-      - [0x215CA8, rodata, rodata_00215BE8]
+      - { start: 0x215CA4, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .rodata.cst4 }
       - { start: 0x215CAC, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .rodata.cst4 }
       - { start: 0x215CDC, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCollisionShape, linker_section: .rodata.cst4 }
       - [0x215CE4, rodata, rodata_00215C24]
       - [0x215CE8, rodata, rodata_00215C28]
       - { start: 0x215D14, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btConvexInternalShape, linker_section: .rodata.cst4 }
       - { start: 0x215D3C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCylinderShape, linker_section: .rodata.cst4 }
-      - [0x215D5C, rodata, rodata_00215C9C]
-      - [0x215D60, rodata, rodata_00215CA0]
+      - { start: 0x215D5C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .rodata.cst4 }
       - { start: 0x215DD0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btPolyhedralConvexShape, linker_section: .rodata.cst4 }
       - { start: 0x215E08, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btSphereShape, linker_section: .rodata.cst4 }
       - { start: 0x215E1C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btStaticPlaneShape, linker_section: .rodata.cst4 }
@@ -433,12 +432,12 @@ segments:
       - { start: 0x237CCC, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm, linker_section: .rodata.str1.4 }
       - { start: 0x237CF0, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btSphereTriangleCollisionAlgorithm, linker_section: .rodata.str1.4 }
       - { start: 0x237D14, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .rodata.str1.4 }
-      - [0x237D18, rodata, rodata_00237C58]
+      - { start: 0x237D18, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .rodata.str1.4 }
       - { start: 0x237D64, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .rodata.str1.4 }
       - [0x237D8C, rodata, rodata_00237CCC]
       - [0x237D90, rodata, rodata_00237CD0]
       - { start: 0x237DBC, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCylinderShape, linker_section: .rodata.str1.4 }
-      - [0x237DE0, rodata, rodata_00237D20]
+      - { start: 0x237DE0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .rodata.str1.4 }
       - { start: 0x237E04, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btSphereShape, linker_section: .rodata.str1.4 }
       - { start: 0x237E0C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btStaticPlaneShape, linker_section: .rodata.str1.4 }
       - { start: 0x237E18, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btTriangleMeshShape, linker_section: .rodata.str1.4 }
@@ -509,7 +508,22 @@ segments:
       - { start: 0x242068, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .gnu.linkonce.r._ZNK10btBoxShape7getEdgeEiR9btVector3S1_ }
       - { start: 0x242098, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .gnu.linkonce.r._ZNK10btBoxShape32getPreferredPenetrationDirectionEiR9btVector3 }
       - { start: 0x2420B0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBoxShape, linker_section: .gnu.linkonce.r._ZNK10btBoxShape16getPlaneEquationER9btVector4i }
-      - [0x2420C8, rodata, rodata_00242008]
+      - { start: 0x2420C8, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTI22btBvhTriangleMeshShape }
+      - { start: 0x2420D4, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTS22btBvhTriangleMeshShape }
+      - { start: 0x2420F0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTV22btBvhTriangleMeshShape }
+      - { start: 0x242138, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTVZNK22btBvhTriangleMeshShape19processAllTrianglesEP18btTriangleCallbackRK9btVector3S4_E21MyNodeOverlapCallback }
+      - { start: 0x242150, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTIZNK22btBvhTriangleMeshShape19processAllTrianglesEP18btTriangleCallbackRK9btVector3S4_E21MyNodeOverlapCallback }
+      - { start: 0x24215C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTI21btNodeOverlapCallback }
+      - { start: 0x242164, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTS21btNodeOverlapCallback }
+      - { start: 0x24217C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTSZNK22btBvhTriangleMeshShape19processAllTrianglesEP18btTriangleCallbackRK9btVector3S4_E21MyNodeOverlapCallback }
+      - [0x2421EC, rodata, rodata_0024212C]
+      - { start: 0x2421F0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTV21btNodeOverlapCallback }
+      - { start: 0x242208, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTVZN22btBvhTriangleMeshShape17performConvexcastEP18btTriangleCallbackRK9btVector3S4_S4_S4_E21MyNodeOverlapCallback }
+      - { start: 0x242220, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTIZN22btBvhTriangleMeshShape17performConvexcastEP18btTriangleCallbackRK9btVector3S4_S4_S4_E21MyNodeOverlapCallback }
+      - { start: 0x24222C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTSZN22btBvhTriangleMeshShape17performConvexcastEP18btTriangleCallbackRK9btVector3S4_S4_S4_E21MyNodeOverlapCallback }
+      - { start: 0x2422A0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTVZN22btBvhTriangleMeshShape14performRaycastEP18btTriangleCallbackRK9btVector3S4_E21MyNodeOverlapCallback }
+      - { start: 0x2422B8, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTIZN22btBvhTriangleMeshShape14performRaycastEP18btTriangleCallbackRK9btVector3S4_E21MyNodeOverlapCallback }
+      - { start: 0x2422C4, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btBvhTriangleMeshShape, linker_section: .gnu.linkonce.r._ZTSZN22btBvhTriangleMeshShape14performRaycastEP18btTriangleCallbackRK9btVector3S4_E21MyNodeOverlapCallback }
       - { start: 0x24232C, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .gnu.linkonce.r._ZTI14btCapsuleShape }
       - { start: 0x242338, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCapsuleShape, linker_section: .gnu.linkonce.r._ZTS14btCapsuleShape }
       - [0x24234C, rodata, rodata_0024228C]
@@ -538,7 +552,16 @@ segments:
       - { start: 0x242610, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCylinderShape, linker_section: .gnu.linkonce.r._ZTV15btCylinderShape }
       - { start: 0x242688, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCylinderShape, linker_section: .gnu.linkonce.r._ZTV16btCylinderShapeX }
       - { start: 0x242700, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btCylinderShape, linker_section: .gnu.linkonce.r._ZTV16btCylinderShapeZ }
-      - [0x242778, rodata, rodata_002426B8]
+      - { start: 0x242778, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTI14btOptimizedBvh }
+      - { start: 0x242780, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTS14btOptimizedBvh }
+      - [0x242794, rodata, rodata_002426D4]
+      - { start: 0x242798, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTV14btOptimizedBvh }
+      - { start: 0x2427A8, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTVZN14btOptimizedBvh5buildEP23btStridingMeshInterfacebRK9btVector3S4_E29QuantizedNodeTriangleCallback }
+      - { start: 0x2427C0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTIZN14btOptimizedBvh5buildEP23btStridingMeshInterfacebRK9btVector3S4_E29QuantizedNodeTriangleCallback }
+      - { start: 0x2427CC, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTSZN14btOptimizedBvh5buildEP23btStridingMeshInterfacebRK9btVector3S4_E29QuantizedNodeTriangleCallback }
+      - { start: 0x242830, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTVZN14btOptimizedBvh5buildEP23btStridingMeshInterfacebRK9btVector3S4_E20NodeTriangleCallback }
+      - { start: 0x242848, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTIZN14btOptimizedBvh5buildEP23btStridingMeshInterfacebRK9btVector3S4_E20NodeTriangleCallback }
+      - { start: 0x242854, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh, linker_section: .gnu.linkonce.r._ZTSZN14btOptimizedBvh5buildEP23btStridingMeshInterfacebRK9btVector3S4_E20NodeTriangleCallback }
       - { start: 0x2428B0, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btPolyhedralConvexShape, linker_section: .gnu.linkonce.r._ZTI23btPolyhedralConvexShape }
       - { start: 0x2428BC, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btPolyhedralConvexShape, linker_section: .gnu.linkonce.r._ZTS23btPolyhedralConvexShape }
       - { start: 0x2428D8, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btPolyhedralConvexShape, linker_section: .gnu.linkonce.r._ZTV23btPolyhedralConvexShape }
@@ -650,7 +673,8 @@ segments:
       - { start: 0x248258, type: bss, vram: 0x248198, name: bss } # .sbss .bss .bss.0001-0002
       # btManifoldResult.cpp: gContactAddedCallback
       - { start: 0x248258, type: .bss, vram: 0x62C658, name: bullet/BulletCollision/CollisionDispatch/btManifoldResult }
-      - { start: 0x248258, type: bss, vram: 0x62C65C, name: bss_0062C65C }
+      # btOptimizedBvh.cpp: maxIterations
+      - { start: 0x248258, type: .bss, vram: 0x62C65C, name: bullet/BulletCollision/CollisionShapes/btOptimizedBvh }
       # btGjkPairDetector.cpp: gNumGjkChecks, gNumDeepPenetrationChecks
       - { start: 0x248258, type: .bss, vram: 0x62C660, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkPairDetector }
       # btPersistentManifold.cpp: gContactProcessedCallback, gContactDestroyedCallback

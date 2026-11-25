@@ -94,9 +94,8 @@ Bullet commit `79b6f7a77219` (2008-08-26, which moved most of it into
 absent, `btOptimizedBvh`'s typeinfo (0x2426B8) has no base class, its vtable (0x2426DC)
 points into this range (D1 0x148830, D0 0x1484A4), and the file of commit
 `115018330038` (with the game's `btQuantizedBvhNode` change) gives every
-function at the game's offset from 0x147468 up to `updateBvhNodes` (0x14C96C), the
-only one not identical (93.6 %: the last loop, one induction variable in the game,
-two in ours; 8 bytes shorter). `src/bullet` is therefore that tree
+function at the game's offset from 0x147468 (`updateBvhNodes`, 0x14C96C, since the
+`madd` pattern of `notes/COMPILER.md`). `src/bullet` is therefore that tree
 (`notes/PROVENANCE.md`). The `.eh_frame` entry a later file
 has for its own, discarded copy of such a function holds the kept copy's address
 (0x2053D8 in `btSphereShape.cpp`'s block: 0x1D0178, `btConvexShape::~btConvexShape`
@@ -118,10 +117,12 @@ to it.
 | 0x142E74-0x1432EC | `btSphereSphereCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE41) |
 | 0x1432EC-0x143834 | `btSphereTriangleCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE89) |
 | 0x143834-0x143B14 | `btBoxShape.cpp` | identical, linked from source (its inline functions 0x1D95DC-0x1DA010, `getEdge` at 0x1D95FC) |
+| 0x143B14-0x1449BC | `btBvhTriangleMeshShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20AEE7; the `processNode` of `performRaycast` / `performConvexcast` since the `madd` pattern, notes/COMPILER.md) |
 | 0x1449BC-0x145360 | `btCapsuleShape.cpp` | identical, linked from source |
 | 0x145360-0x1456CC | `btCollisionShape.cpp` | identical, linked from source |
 | 0x146658-0x146C1C | `btConvexInternalShape.cpp` | identical, linked from source |
 | 0x146C1C-0x147468 | `btCylinderShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20AFFB; its copies of `btBoxShape::getPreferredPenetrationDirection` / `getPlaneEquation` are the discarded ones) |
+| 0x147468-0x14E870 | `btOptimizedBvh.cpp` | identical, linked from source (the file of before the `btQuantizedBvh` split; `.gcc_except_table` 0x20B05F; `.bss` 0x62C65C: `maxIterations`; `updateBvhNodes` since the `madd` pattern) |
 | 0x14E870-0x14F17C | `btPolyhedralConvexShape.cpp` | identical, linked from source (`getAabb` since the compiler's pseudo register numbers, notes/COMPILER.md) |
 | 0x14F17C-0x14F4E8 | `btSphereShape.cpp` | identical, linked from source |
 | 0x14F4E8-0x14FA60 | `btStaticPlaneShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20B118) |
