@@ -76,6 +76,13 @@ each change is a reconstruction from the game's code, not a copy of other code:
   `btOptimizedBvh::build` (0x14E194) keeps a temporary of that type at `sp+0x14`,
   which a 16-byte aligned type cannot have; with the change the function is
   identical and no other function of the library changes.
+- `BulletCollision/BroadphaseCollision/btQuantizedBvh.cpp`:
+  `walkStacklessQuantizedTreeAgainstRay` sets a zero component of the inverse ray
+  direction to 1.0 instead of 1e30, as the upstream comment above those lines says:
+  the game's function (0x14AED0) tests each component against zero and stores the
+  constant 1.0 it also divides with (0x215CB8); no 1e30 there. With the change the
+  function has the game's size (589 instructions) and goes from 5 % to 91 % (the
+  rest: order and registers in the ray-box test); no other function changes.
 
 Written for this project: `include/cxx/` (minimal C and C++ declarations for Bullet;
 `new` declares `std::exception`, `std::bad_alloc` and the global allocation functions
