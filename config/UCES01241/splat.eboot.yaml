@@ -82,7 +82,7 @@ segments:
       - [0x20B840, rodata, rodata]         # .rodata .rodata.0001-0106, padding
       - [0x20E6E4, .rodata, expat/xmlrole]
       - [0x20EA08, rodata, rodata_0020E948]
-      - [0x215BF4, .rodata, bullet/BulletCollision/CollisionDispatch/btCollisionObject]
+      - { start: 0x215BF4, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .rodata.cst4 }
       - [0x215C04, rodata, rodata_00215B44]
       - [0x215C08, rodata, rodata_00215B48] # 8-aligned start: the file holds doubles
       - { start: 0x241560, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .gnu.linkonce.r._ZTI17btCollisionObject }

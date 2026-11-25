@@ -45,7 +45,9 @@ CC_EXE = COMPILER_CONFIG.get("exe") if COMPILER_CONFIG else None
 CC_FLAGS = (COMPILER_CONFIG["flags"] if COMPILER_CONFIG else "") + " -Iinclude -Isrc"
 # [compiler.dirs."src/<dir>"]: another compiler (linux = ...) and its own complete flags
 # for the sources of a directory, e.g. a library built with another toolchain than the
-# game (notes/COMPILER.md); the deepest matching directory wins
+# game (notes/COMPILER.md); the deepest matching directory wins. `cwd`: the directory
+# the compiler runs in (paths of `flags` relative to it), as the original build did for
+# its `__FILE__` strings; `rename_sections`: tools/psp/compile.py --rename-section values
 CC_DIRS = COMPILER_CONFIG.get("dirs", {}) if COMPILER_CONFIG else {}
 # unaligned_words = true: lwl/lwr/swl/swr written as .word for an assembler that
 # refuses them (tools/psp/compile.py --unaligned-words)
@@ -140,8 +142,11 @@ def dir_compiler(source: str) -> dict[str, str] | None:
     entry = CC_DIRS[d]
     if "linux" not in entry or "flags" not in entry:
         sys.exit(f'decomp.toml: [compiler.dirs."{d}"] needs `linux` and `flags`')
+    options = "".join(f"--rename-section {r} " for r in entry.get("rename_sections", []))
+    if "cwd" in entry:
+        options += f"--cwd {entry['cwd']} "
     return {"cc": " ".join(posix(a) for a in project.linux_command(entry["linux"])),
-            "cc_flags": entry["flags"]}
+            "cc_flags": entry["flags"], "cc_options": options}
 
 
 def write_objdiff(units: list[dict]) -> None:
@@ -164,6 +169,7 @@ def main() -> None:
     n.variable("as_flags", AS_FLAGS)
     n.variable("ld_flags", LD_FLAGS)
     n.variable("cc_flags", CC_FLAGS)
+    n.variable("cc_options", "")
     n.newline()
 
     binutils_stamp = binutils_dir / f"{BINUTILS_PREFIX}as{platform.exe}"
@@ -198,7 +204,7 @@ def main() -> None:
     n.rule("as", f"$python {psp}/assemble.py {posix(tool('as'))} $in $out $as_flags",
            description="AS $in")
     n.variable("cc", posix(cc_command))
-    n.rule("cc", f"$python {psp}/compile.py {CC_OPTIONS}{posix(tool('objcopy'))} $out $cc -c $cc_flags -o $out $in",
+    n.rule("cc", f"$python {psp}/compile.py {CC_OPTIONS}${{cc_options}}{posix(tool('objcopy'))} $out $cc -c $cc_flags -o $out $in",
            description="CC $in")
     n.rule("bin", f"{tool('objcopy')} -I binary -O elf32-littlemips -B mips $in $out",
            description="BIN $in")

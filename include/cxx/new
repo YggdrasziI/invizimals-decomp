@@ -1,13 +1,32 @@
 // Minimal declarations for building Bullet (C++) without a C library; written for this project.
+// The exception specifications are the standard's: a deleting destructor that only
+// calls operator delete is then nothrow and gets no unwind entry.
 #ifndef _NEW
 #define _NEW
 #include <stddef.h>
-void *operator new(size_t);
-void *operator new[](size_t);
-void operator delete(void *);
-void operator delete[](void *);
-inline void *operator new(size_t, void *p) { return p; }
-inline void *operator new[](size_t, void *p) { return p; }
-inline void operator delete(void *, void *) {}
-inline void operator delete[](void *, void *) {}
+namespace std
+{
+  // as declared by libstdc++ (<exception>, <new>); nothing here is defined
+  class exception
+  {
+  public:
+    exception() throw() { }
+    virtual ~exception() throw();
+    virtual const char *what() const throw();
+  };
+  class bad_alloc : public exception
+  {
+  public:
+    bad_alloc() throw() { }
+    virtual ~bad_alloc() throw();
+  };
+}
+void *operator new(size_t) throw(std::bad_alloc);
+void *operator new[](size_t) throw(std::bad_alloc);
+void operator delete(void *) throw();
+void operator delete[](void *) throw();
+inline void *operator new(size_t, void *p) throw() { return p; }
+inline void *operator new[](size_t, void *p) throw() { return p; }
+inline void operator delete(void *, void *) throw() {}
+inline void operator delete[](void *, void *) throw() {}
 #endif

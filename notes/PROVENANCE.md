@@ -72,7 +72,9 @@ each change is a reconstruction from the game's code, not a copy of other code:
   game's allocator (0xBDE8 with alignment, size and the calling file's name, 0xBE04),
   as every Bullet function of the game does.
 
-Written for this project: `include/cxx/` (minimal C and C++ declarations for Bullet).
+Written for this project: `include/cxx/` (minimal C and C++ declarations for Bullet;
+`new` declares `std::exception`, `std::bad_alloc` and the global allocation functions
+with the standard's exception specifications).
 
 ## GCC 4.0.x build kit
 

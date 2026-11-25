@@ -174,3 +174,29 @@ there keeps its default.
   allocation; flags tried without gain: `-fno-reorder-blocks`, `-fno-crossjumping`,
   `-fno-gcse`, `-fno-tree-pre`, `-fno-loop-optimize`, `-fno-strict-aliasing`,
   `-fno-unit-at-a-time`, `-fno-tree-loop-optimize` (with `4.0.4h`).
+
+## Bullet: how its files were built
+
+2026-11-25, from whole files that match (`notes/SPLITS.md`, "Bullet files"):
+
+- the game's compiler (`4.0.4a`) at `-O3 -G0 -mpreferred-stack-boundary=4 -DNDEBUG`
+  (`-O3` gives the same code as `-O2 -finline-functions`; `NDEBUG`: no `assert`
+  strings);
+- run from the Bullet root with `-I.`: the `__FILE__` strings are
+  `BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.cpp` and
+  `./LinearMath/btAlignedAllocator.h` (header found through `-I.`); `decomp.toml` runs
+  the compiler in `src/bullet` (`tools/psp/compile.py --cwd`);
+- constants and strings in their mergeable sections (`.rodata.cst4`,
+  `.rodata.str1.4`, the default `-fmerge-constants`): each file's floats sit together
+  in `.rodata` and its strings with the other files' strings (0x2379F4-0x237F64),
+  and the link merged none of them (`./LinearMath/btAlignedAllocator.h` is there once
+  per file, and a file's `.rodata.cst4` keeps its duplicates, 0.5, 1.0, 0.5, 1.0 for
+  `btCollisionObject.cpp`). GNU ld would merge them: the build drops their merge flag
+  (`compile.py --rename-section` with explicit flags);
+- `operator delete(void *)` declared `throw()` as the standard does: a deleting
+  destructor that only calls it is then nothrow, and GCC 4.0 writes no `.eh_frame`
+  entry for it, as in the original (`include/cxx/new`);
+- one `.eh_frame` CIE per object, then its FDEs, not merged; `.gnu.linkonce.*`
+  sections kept from the first file of the link (`btEmptyCollisionAlgorithm.cpp`'s
+  copy of `btCollisionAlgorithm`'s vtable and destructors, before
+  `btCollisionAlgorithm.cpp`), GNU ld's rule for them too.
