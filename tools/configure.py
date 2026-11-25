@@ -292,6 +292,12 @@ def main() -> None:
                 n.build(obj, "bin", src, implicit=[posix(binutils_stamp)])
         elf = build_dir / f"{module.name}.elf"
         undefined = [build_dir / "undefined_syms_auto.txt", build_dir / "undefined_funcs_auto.txt"]
+        # Addresses the assembly refers to that now fall inside a section a unit linked
+        # from source provides, with no symbol of its own there (splat counts them as
+        # defined by the unit): `name = address;` lines, hand-written with evidence
+        extra = config_dir / f"{module.name}.symbols.ld"
+        if (ROOT / extra).exists():
+            undefined.append(extra)
         n.build(posix(elf), "ld", objs, implicit=[posix(ld_script)] + [posix(u) for u in undefined],
                 variables={"script": posix(ld_script), "map": posix(elf.with_suffix(".map")),
                            "undefined": " ".join(f"-T {posix(u)}" for u in undefined)})
