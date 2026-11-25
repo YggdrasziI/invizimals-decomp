@@ -296,6 +296,21 @@ for a MIPS target (`need_64bit_hwint=yes` in `config.gcc`), and `cc1` / `cc1plus
 built as 32-bit programs (i686 Linux, static) give the same 546 identical Bullet
 functions, none gained or lost.
 
+**Integer multiplication by a constant** (2026-11-25, open). The game divides a
+pointer difference by a structure size with `mult` by the inverse (`lui`/`ori`
+0xCCCCCCCD, `mult`, `mflo` for 20-byte elements: 0x126C, 0x12B4). Our compiler
+writes a shift/add chain (`sll`/`addu`, then `negu`): `expand_mult` (`expmed.c`,
+`choose_mult_variant`) keeps the chain when it costs less than `rtx_cost` of the
+`MULT`, and `mips_rtx_costs` has no Allegrex case, so the default
+`COSTS_N_INSNS (10)` applies. An Allegrex case (trial tree
+`~/lbp-gcc4/work/psp-gcc-4.0.4a-mul`, `-DALLEGREX_IMUL_COST=<n>`) gives the game's
+`mult` for n = 5, 6, 7 and 8, not 9; Bullet stays at 1200/1682 for every n from 5 to 9
+(none gained or lost: its code has no such constant multiplication). With n = 5 or 8,
+0x126C matches and 0x12B4 goes from 60.7 % to 78.5 %. Not adopted yet: the value
+inside 5-8 needs a game function that tells them apart (a constant whose chain costs
+6 to 8 instructions). The earlier note that an integer multiplication below 5 loses
+four functions fits this range.
+
 ### Adopted
 
 2026-11-24: `4.0.4c` at `-O2 -G0` is the `[compiler]` of `decomp.toml`. Built in WSL
