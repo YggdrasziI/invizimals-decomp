@@ -87,12 +87,15 @@ object has one `.ctors` and one `.dtors` entry (its `_GLOBAL__I_` / `_GLOBAL__D_
 functions) and a `.bss` piece in program header 1, entered in the `data` segment at
 its address in the absolute image (the value in the PRX plus 0x243780); the build
 script names the C++ object there and keeps the bss start unaligned
-(`tools/configure.py`, `split`).
+(`tools/configure.py`, `split`). A global variable such a file defines in `.bss` or
+`.data` also needs its name in `symbol_addrs.txt` when the remaining assembly refers
+to it.
 
 | Range | File | Status |
 |---|---|---|
 | 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical, linked from source |
 | 0x141410-0x141484 | `btEmptyCollisionAlgorithm.cpp` | identical, linked from source (with `btCollisionAlgorithm`'s vtable, typeinfo and destructors) |
+| 0x141490-0x141DE4 | `btManifoldResult.cpp` | identical, linked from source (`.bss` 0x62C658: `gContactAddedCallback`) |
 | 0x142E74-0x1432EC | `btSphereSphereCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE41) |
 | 0x1432EC-0x143834 | `btSphereTriangleCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE89) |
 | 0x143834-0x143B14 | `btBoxShape.cpp` | identical, linked from source (its inline functions 0x1D95DC-0x1DA010, `getEdge` at 0x1D95FC) |
@@ -104,13 +107,17 @@ script names the C++ object there and keeps the bss start unaligned
 | 0x1501AC-0x15020C | `btTriangleCallback.cpp` | identical, linked from source |
 | 0x15183C-0x15186C | `btConvexCast.cpp` | identical, linked from source |
 | 0x15186C-0x151954 | `btGjkEpaPenetrationDepthSolver.cpp` | identical, linked from source |
+| 0x15256C-0x153080 | `btPersistentManifold.cpp` | identical, linked from source (`.data` 0x2479D4: `gContactBreakingThreshold`; `.bss` 0x62C668: `gContactProcessedCallback`, `gContactDestroyedCallback`) |
+| 0x153080-0x153B64 | `btRaycastCallback.cpp` | identical, linked from source (`.gcc_except_table` 0x20B1C4) |
 | 0x16392C-0x163CB8 | `btTypedConstraint.cpp` | identical, linked from source (`.ctors` 0x1E4A54, `.dtors` 0x1E4B10, `.gcc_except_table` 0x20B25E, `.bss` 0x64C680: `static btRigidBody s_fixed`) |
 | 0x16AC90-0x16ACC0 | `btCollisionAlgorithm.cpp` | identical, linked from source |
 | 0x16ACC0-0x16ACF0 | `btDispatcher.cpp` | identical, linked from source |
+| 0x16ACF0-0x16BA14 | `SphereTriangleDetector.cpp` | identical, linked from source |
 | 0x16BA14-0x16BF34 | `btBoxBoxCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B40D) |
 | 0x1717A0-0x172204 | `btConvexConvexAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B5CD, `.bss` 0x64C878: `bool disableCcd`) |
 | 0x17478C-0x1747EC | `btConcaveShape.cpp` | identical, linked from source |
 | 0x1747EC-0x174E40 | `btGjkConvexCast.cpp` | identical, linked from source (`.gcc_except_table` 0x20B718) |
+| 0x174E40-0x17662C | `btGjkEpa2.cpp` | identical, linked from source (`.rodata` 0x20E0D0, `.gcc_except_table` 0x20B732) |
 
 Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
 0x1ACE24-0x1AF818) hold more library code without telling strings; 0x1AC080, in the

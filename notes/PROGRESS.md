@@ -7,3 +7,4 @@
 | 2026-11-25 | | 17408 bytes (0.88 %) | 204 | 18 / 47 | 16 Bullet files linked from the original sources (trunk 2.71 with the game's `LinearMath` changes), compiler `4.0.4a` with the retail scheduling latencies |
 | 2026-11-25 | | 18100 bytes (0.91 %) | 215 | 19 / 50 | `btTypedConstraint.cpp` linked: first file with a static object (`.ctors`, `.dtors` and `.bss` pieces) |
 | 2026-11-25 | | 23632 bytes (1.19 %) | 288 | 22 / 54 | 20 Bullet files linked: `btBoxShape.cpp`, `btConvexConvexAlgorithm.cpp` and `btSphereTriangleCollisionAlgorithm.cpp` identical with the retail branch cost (compiler `4.0.4a`) |
+| 2026-11-25 | | 62916 bytes (3.18 %) | 354 | 27 / 62 | 25 Bullet files linked: `btGjkEpa2.cpp`, `btManifoldResult.cpp`, `btPersistentManifold.cpp`, `btRaycastCallback.cpp` and `SphereTriangleDetector.cpp` identical with the BSD host `qsort` |
