@@ -82,7 +82,12 @@ per object, then its FDEs) and its `.gcc_except_table`. A `.gnu.linkonce` sectio
 shared by several files is linked from the first one. The `.eh_frame` entry a later file
 has for its own, discarded copy of such a function holds the kept copy's address
 (0x2053D8 in `btSphereShape.cpp`'s block: 0x1D0178, `btConvexShape::~btConvexShape`
-linked from `btCapsuleShape.cpp`): `linkonce_symbols` in `decomp.toml`.
+linked from `btCapsuleShape.cpp`): `linkonce_symbols` in `decomp.toml`. A file with a static
+object has one `.ctors` and one `.dtors` entry (its `_GLOBAL__I_` / `_GLOBAL__D_`
+functions) and a `.bss` piece in program header 1, entered in the `data` segment at
+its address in the absolute image (the value in the PRX plus 0x243780); the build
+script names the C++ object there and keeps the bss start unaligned
+(`tools/configure.py`, `split`).
 
 | Range | File | Status |
 |---|---|---|
@@ -97,6 +102,7 @@ linked from `btCapsuleShape.cpp`): `linkonce_symbols` in `decomp.toml`.
 | 0x1501AC-0x15020C | `btTriangleCallback.cpp` | identical, linked from source |
 | 0x15183C-0x15186C | `btConvexCast.cpp` | identical, linked from source |
 | 0x15186C-0x151954 | `btGjkEpaPenetrationDepthSolver.cpp` | identical, linked from source |
+| 0x16392C-0x163CB8 | `btTypedConstraint.cpp` | identical, linked from source (`.ctors` 0x1E4A54, `.dtors` 0x1E4B10, `.gcc_except_table` 0x20B25E, `.bss` 0x64C680: `static btRigidBody s_fixed`) |
 | 0x16AC90-0x16ACC0 | `btCollisionAlgorithm.cpp` | identical, linked from source |
 | 0x16ACC0-0x16ACF0 | `btDispatcher.cpp` | identical, linked from source |
 | 0x16BA14-0x16BF34 | `btBoxBoxCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B40D) |

@@ -98,6 +98,25 @@ def split(module: project.Module) -> None:
                         str(image), "--absolute"], check=True, cwd=ROOT)
     subprocess.run([sys.executable, "-m", "splat", "split", str(config_dir / module.splat)],
                    check=True, cwd=ROOT, stdout=subprocess.DEVNULL)
+    # A `.data` / `.bss` piece entered in another segment than its unit's code (program
+    # header 1) has no sibling there: splat takes it for a C file, and also lists the
+    # unit's section after its code segment, where the linker would put it first. Name
+    # the C++ object in the entered piece and drop the automatic line.
+    ld_script = ROOT / build_dir / f"{module.name}.ld"
+    lines = ld_script.read_text().split("\n")
+    drop = set()
+    for i, line in enumerate(lines):
+        m = re.match(r"^(\s*\S+/src/(\S+))\.c\.o(\(\.\w+\);)$", line)
+        if m and not (ROOT / "src" / (m.group(2) + ".c")).exists():
+            lines[i] = f"{m.group(1)}.cpp.o{m.group(3)}"
+            drop.update(k for k, other in enumerate(lines) if k != i and other == lines[i])
+    # A unit's `.bss` can be more aligned than the start of the bss (16 for an aligned
+    # C++ object, the image's `.sbss` starts 8 mod 16): ld would align the whole output
+    # section and move every bss symbol. An explicit address keeps it where it is.
+    text = "\n".join(l for k, l in enumerate(lines) if k not in drop)
+    text = re.sub(r"(?m)^(\s*\.\w+_bss) \(NOLOAD\) :", r"\1 . (NOLOAD) :", text)
+    if text != "\n".join(lines):
+        ld_script.write_text(text, newline="\n")
 
 
 def linker_inputs(ld_script: Path) -> list[str]:

@@ -84,6 +84,8 @@ segments:
       - [0x1518FC, cpp, bullet/BulletCollision/NarrowPhaseCollision/btConvexCast]
       - [0x15192C, cpp, bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver]
       - [0x151A14, asm, text_00151954]
+      - [0x1639EC, cpp, bullet/BulletDynamics/ConstraintSolver/btTypedConstraint]
+      - [0x163D78, asm, text_00163CB8]
       - [0x16AD50, cpp, bullet/BulletCollision/BroadphaseCollision/btCollisionAlgorithm]
       - [0x16AD80, cpp, bullet/BulletCollision/BroadphaseCollision/btDispatcher]
       - [0x16ADB0, asm, text_0016ACF0]
@@ -160,6 +162,9 @@ segments:
       - { start: 0x1DB664, type: cpp, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .gnu.linkonce.t._ZN30btGjkEpaPenetrationDepthSolverD0Ev }
       - { start: 0x1DB674, type: cpp, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .gnu.linkonce.t._ZN30btGjkEpaPenetrationDepthSolverD1Ev }
       - [0x1DB684, asm, text_001DB5C4]
+      - { start: 0x1DC068, type: cpp, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .gnu.linkonce.t._ZN17btTypedConstraintD1Ev }
+      - { start: 0x1DC078, type: cpp, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .gnu.linkonce.t._ZN17btTypedConstraintD0Ev }
+      - [0x1DC088, asm, text_001DBFC8]
       - { start: 0x1DCF3C, type: cpp, name: bullet/BulletCollision/CollisionDispatch/btBoxBoxCollisionAlgorithm, linker_section: .gnu.linkonce.t._ZN26btBoxBoxCollisionAlgorithm22getAllContactManifoldsER20btAlignedObjectArrayIP20btPersistentManifoldE }
       - [0x1DD084, asm, text_001DCFC4]
       - { start: 0x1DDE80, type: cpp, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkConvexCast, linker_section: .gnu.linkonce.t._ZN15btGjkConvexCastD1Ev }
@@ -170,6 +175,11 @@ segments:
       - [0x1E41AC, rodata, sceresident]    # .rodata.sceResident
       - [0x1E44B4, rodata, scenid]         # .rodata.sceNid
       - [0x1E4A04, rodata, ctors]          # .ctors .dtors .jcr
+      - { start: 0x1E4B14, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .ctors }
+      - [0x1E4B18, rodata, rodata_001E4A58]
+      - { start: 0x1E4BD0, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .dtors }
+      - [0x1E4BD4, rodata, rodata_001E4B14]
+      - [0x1E4BD8, rodata, rodata_001E4B18]
       - [0x1E4BDC, rodata, eh_frame]       # .eh_frame .gcc_except_table
       - { start: 0x2038B4, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .eh_frame }
       - [0x2038E0, rodata, eh_frame_00203820]
@@ -190,6 +200,9 @@ segments:
       - { start: 0x2059F0, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .eh_frame }
       - [0x205A24, rodata, eh_frame_00205964]
       - [0x205A28, rodata, eh_frame_00205968]
+      - { start: 0x206468, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .eh_frame }
+      - [0x20657C, rodata, eh_frame_002064BC]
+      - [0x206580, rodata, eh_frame_002064C0]
       - { start: 0x206E3C, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btBoxBoxCollisionAlgorithm, linker_section: .eh_frame }
       - [0x206F5C, rodata, eh_frame_00206E9C]
       - [0x206F60, rodata, eh_frame_00206EA0]
@@ -203,6 +216,10 @@ segments:
       - { start: 0x20B1D8, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btStaticPlaneShape, linker_section: .gcc_except_table }
       - [0x20B1FC, rodata, eh_frame_0020B13C]
       - [0x20B200, rodata, eh_frame_0020B140]
+      - { start: 0x20B31C, type: bin, name: eh_frame_0020B25C, linker_section_order: .rodata }
+      - { start: 0x20B31E, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .gcc_except_table }
+      - { start: 0x20B332, type: bin, name: eh_frame_0020B272, linker_section_order: .rodata }
+      - [0x20B334, rodata, eh_frame_0020B274]
       - { start: 0x20B4CC, type: bin, name: eh_frame_0020B40C, linker_section_order: .rodata }
       - { start: 0x20B4CD, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btBoxBoxCollisionAlgorithm, linker_section: .gcc_except_table }
       # bytes around the odd-aligned table: raw, as spimdisasm writes no unaligned words
@@ -329,6 +346,11 @@ segments:
       - { start: 0x242D6C, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .gnu.linkonce.r._ZTS30btGjkEpaPenetrationDepthSolver }
       - { start: 0x242D90, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .gnu.linkonce.r._ZTV30btGjkEpaPenetrationDepthSolver }
       - [0x242DA8, rodata, rodata_00242CE8]
+      - { start: 0x242F44, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .gnu.linkonce.r._ZTI17btTypedConstraint }
+      - { start: 0x242F4C, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .gnu.linkonce.r._ZTS17btTypedConstraint }
+      - [0x242F60, rodata, rodata_00242EA0]
+      - { start: 0x242F90, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .gnu.linkonce.r._ZTV17btTypedConstraint }
+      - [0x242FA8, rodata, rodata_00242EE8]
       - { start: 0x243360, type: .rodata, name: bullet/BulletCollision/BroadphaseCollision/btDispatcher, linker_section: .gnu.linkonce.r._ZTI12btDispatcher }
       - { start: 0x243368, type: .rodata, name: bullet/BulletCollision/BroadphaseCollision/btDispatcher, linker_section: .gnu.linkonce.r._ZTS12btDispatcher }
       - { start: 0x243378, type: .rodata, name: bullet/BulletCollision/BroadphaseCollision/btDispatcher, linker_section: .gnu.linkonce.r._ZTV12btDispatcher }
@@ -357,6 +379,9 @@ segments:
     subsegments:
       - [0x243840, data, data]             # .data .data.0001
       - { start: 0x248258, type: bss, vram: 0x248198, name: bss } # .sbss .bss .bss.0001-0002
+      # btTypedConstraint.cpp: static btRigidBody s_fixed
+      - { start: 0x248258, type: .bss, vram: 0x64C680, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint }
+      - { start: 0x248258, type: bss, vram: 0x64C870, name: bss_0064C870 }
 
   - [0x248258, bin, elf_tail]
   - [0x314D34]
