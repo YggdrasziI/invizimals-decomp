@@ -43,6 +43,21 @@ the GitHub tag `R_2_0_0` of libexpat), **unmodified**. License: MIT (`src/expat/
 Written for this project: `include/expat/expat_config.h` (the build configuration,
 in place of the configure script's output) and `include/libc/` (minimal declarations).
 
+## Bullet Physics, trunk 66861ad3340a (`src/bullet`)
+
+The game links Bullet Physics from its trunk between the 2.70 and 2.71 releases
+(`notes/SPLITS.md`, `notes/COMPILER.md`): function by function, the closest snapshot
+is commit `66861ad3340a` of [bulletphysics/bullet3](https://github.com/bulletphysics/bullet3)
+("bump up version to 2.71", 2008-08-29; `VERSION` says 2.71), and functions it gives
+identical are lost from the next commits on. `src/bullet` holds the `*.cpp` and `*.h`
+of `src/LinearMath`, `src/BulletCollision` and `src/BulletDynamics`, the three headers
+of `src/` (`btBulletCollisionCommon.h`, `btBulletDynamicsCommon.h`, `Bullet-C-Api.h`)
+and `BulletLicense.txt` of the GitHub archive of that commit
+(`codeload.github.com/bulletphysics/bullet3/tar.gz/66861ad3340a`, SHA-256
+`0ad18ad474832805d795e958980cfcae55aec3e704a85cb73254daf93ec09afb`). License: zlib
+(`src/bullet/BulletLicense.txt`). Files changed for the game's build are marked as
+such at their top and listed here:
+
 ## GCC 4.0.x build kit
 
 The probe workflow `.github/workflows/probe-gcc4.yml` fetches `toolchain/gcc4` of
