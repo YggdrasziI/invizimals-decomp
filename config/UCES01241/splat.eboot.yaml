@@ -94,6 +94,7 @@ segments:
       - [0x15262C, cpp, bullet/BulletCollision/NarrowPhaseCollision/btPersistentManifold]
       - [0x153140, cpp, bullet/BulletCollision/NarrowPhaseCollision/btRaycastCallback]
       - [0x153C24, asm, text_00153B64]
+      - [0x154798, cpp, bullet/BulletCollision/NarrowPhaseCollision/btVoronoiSimplexSolver]
       - [0x156120, cpp, bullet/BulletDynamics/ConstraintSolver/btConeTwistConstraint]
       - [0x158870, asm, text_001587B0]
       - [0x15CC48, cpp, bullet/BulletDynamics/ConstraintSolver/btPoint2PointConstraint]
@@ -380,6 +381,9 @@ segments:
       - { start: 0x20B806, type: bin, name: eh_frame_0020B746, linker_section_order: .rodata }
       - [0x20B808, rodata, eh_frame_0020B748]
       - [0x20B840, rodata, rodata]         # .rodata .rodata.0001-0106, padding
+      - [0x20E120, .rodata, bullet/BulletCollision/NarrowPhaseCollision/btVoronoiSimplexSolver]
+      - [0x20E134, rodata, rodata_0020E074]
+      - [0x20E138, rodata, rodata_0020E078]
       - [0x20E190, .rodata, bullet/BulletCollision/NarrowPhaseCollision/btGjkEpa2]
       - [0x20E1A0, rodata, rodata_0020E0E0]
       - [0x20E6E4, .rodata, expat/xmlrole]
@@ -411,6 +415,7 @@ segments:
       - { start: 0x215EA0, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btPersistentManifold, linker_section: .rodata.cst4 }
       - { start: 0x215EA4, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btRaycastCallback, linker_section: .rodata.cst4 }
       - [0x215ED0, rodata, rodata_00215E10]
+      - { start: 0x215EE0, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btVoronoiSimplexSolver, linker_section: .rodata.cst4 }
       - { start: 0x215EF4, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btConeTwistConstraint, linker_section: .rodata.cst4 }
       - [0x215F54, rodata, rodata_00215E94]
       - [0x215F58, rodata, rodata_00215E98]
