@@ -234,10 +234,19 @@ sequence comes out: Bullet sweep 1166 -> 1168 of 1695 (with the inline functions
 none lost (`btRandInt2`, the `processNode` of `btBvhTriangleMeshShape::
 processAllTriangles`); `btOptimizedBvh::updateBvhNodes` goes from 20 % to 94 %,
 `performRaycast` / `performConvexcast` from 47 % to 75 %, `InternalProcessAllTriangles`
-from 56 % to 70 % (left: order of `mtlo` and loads, registers). The exact retail
-pattern is not known, only this behaviour; `btCollisionDispatcher::
-freeCollisionAlgorithm` (0x13BD1C) has the `madd` but another register allocation
-(the argument copied to `$a3`). Adopted in build `4.0.4a`: `tools/gcc/madd-4.0.4.diff`.
+from 56 % to 70 % (left: order of `mtlo` and loads, registers). Adopted in build
+`4.0.4a`: `tools/gcc/madd-4.0.4.diff`.
+With the second alternative too (result in a general register), local-alloc ties the
+multiplied operand that dies in the `madd` to the result (it tries every input when no
+operand matches operand 0 in all alternatives); the game does not: in
+`updateBvhNodes` (0x14C96C) the loaded index is in `$v1` and the result in `$v0`, ours
+had both in `$v0`, which moved the pointers of the 16-bit index loop to other
+registers (two copies more). With the first alternative only (accumulator and result
+in LO, the accumulator tied to the result), the Bullet sweep goes 1194 -> 1199 of
+1682, none lost: `updateBvhNodes`, `freeCollisionAlgorithm` (0x13BD1C), `btRand2`, the
+`MyNodeOverlapCallback::processNode` of `performRaycast` and `performConvexcast`.
+Adopted in the same diff. The exact retail pattern is still not known, only this
+behaviour.
 
 **Pseudo register numbers** (2026-11-25). In `btPolyhedralConvexShape::getAabb`
 (0x14E9D0) the only difference was that the loads at `trans+16` and `trans+32` get

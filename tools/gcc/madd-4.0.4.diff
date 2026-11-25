@@ -7,10 +7,14 @@ The game has 135 madd / msub, the kit's compiler none: ISA_HAS_MADD_MSUB leaves 
 Allegrex out, so the *mul_acc_si / *mul_sub_si patterns are off and only the kit's
 allegrex_madd (accumulator tied to the result) is left, which combine never forms.
 In config/mips/mips.h the Allegrex joins ISA_HAS_MADD_MSUB. In config/mips/mips.md the
-two patterns lose their third alternative (accumulator and result in general
-registers, split into a three-operand mul the Allegrex lacks): the accumulator then
-goes through LO, `mtlo` / `madd` / `mflo`, the game's sequence. Bullet sweep 1166 ->
-1168 of 1695 (with the inline functions), none lost.
+two patterns keep only their first alternative, accumulator and result in LO: the
+accumulator then goes through LO, `mtlo` / `madd` / `mflo`, the game's sequence (the
+third alternative, a three-operand mul the Allegrex lacks, makes the compiler fail).
+With the accumulator tied to the result in every alternative, local-alloc no longer
+ties a multiplied operand that dies there to the result, as in the game
+(btOptimizedBvh::updateBvhNodes, 0x14C96C: the loaded index in $v1, the result in $v0).
+Bullet sweep 1166 -> 1168 of 1695 (with the inline functions) with the first two
+alternatives, then 1194 -> 1199 with the first one only, none lost.
 GCC code is GPL-2.0-or-later (GCC 4.0.4) and the kit's context GPL-3.0-or-later.
 --- a/gcc/config/mips/mips.h
 +++ b/gcc/config/mips/mips.h
@@ -35,13 +39,13 @@ GCC code is GPL-2.0-or-later (GCC 4.0.4) and the kit's context GPL-3.0-or-later.
 -   (clobber (match_scratch:SI 4 "=h,h,h"))
 -   (clobber (match_scratch:SI 5 "=X,3,l"))
 -   (clobber (match_scratch:SI 6 "=X,X,&d"))]
-+  [(set (match_operand:SI 0 "register_operand" "=l,*d")
-+	(plus:SI (mult:SI (match_operand:SI 1 "register_operand" "d,d")
-+			  (match_operand:SI 2 "register_operand" "d,d"))
-+		 (match_operand:SI 3 "register_operand" "0,l")))
-+   (clobber (match_scratch:SI 4 "=h,h"))
-+   (clobber (match_scratch:SI 5 "=X,3"))
-+   (clobber (match_scratch:SI 6 "=X,X"))]
++  [(set (match_operand:SI 0 "register_operand" "=l")
++	(plus:SI (mult:SI (match_operand:SI 1 "register_operand" "d")
++			  (match_operand:SI 2 "register_operand" "d"))
++		 (match_operand:SI 3 "register_operand" "0")))
++   (clobber (match_scratch:SI 4 "=h"))
++   (clobber (match_scratch:SI 5 "=X"))
++   (clobber (match_scratch:SI 6 "=X"))]
    "(TARGET_MIPS3900
     || ISA_HAS_MADD_MSUB)
     && !TARGET_MIPS16"
@@ -50,14 +54,14 @@ GCC code is GPL-2.0-or-later (GCC 4.0.4) and the kit's context GPL-3.0-or-later.
    return madd[which_alternative];
  }
 -  [(set_attr "type"	"imadd,imadd,multi")
-+  [(set_attr "type"	"imadd,imadd")
++  [(set_attr "type"	"imadd")
     (set_attr "mode"	"SI")
 -   (set_attr "length"	"4,4,8")])
-+   (set_attr "length"	"4,4")])
++   (set_attr "length"	"4")])
  
  ;; Split the above insn if we failed to get LO allocated.
  (define_split
-@@ -1335,21 +1335,20 @@
+@@ -1335,21 +1335,18 @@
  })
  
  (define_insn "*mul_sub_si"
@@ -68,23 +72,24 @@ GCC code is GPL-2.0-or-later (GCC 4.0.4) and the kit's context GPL-3.0-or-later.
 -   (clobber (match_scratch:SI 4 "=h,h,h"))
 -   (clobber (match_scratch:SI 5 "=X,1,l"))
 -   (clobber (match_scratch:SI 6 "=X,X,&d"))]
-+  [(set (match_operand:SI 0 "register_operand" "=l,*d")
-+        (minus:SI (match_operand:SI 1 "register_operand" "0,l")
-+                  (mult:SI (match_operand:SI 2 "register_operand" "d,d")
-+                           (match_operand:SI 3 "register_operand" "d,d"))))
-+   (clobber (match_scratch:SI 4 "=h,h"))
-+   (clobber (match_scratch:SI 5 "=X,1"))
-+   (clobber (match_scratch:SI 6 "=X,X"))]
++  [(set (match_operand:SI 0 "register_operand" "=l")
++        (minus:SI (match_operand:SI 1 "register_operand" "0")
++                  (mult:SI (match_operand:SI 2 "register_operand" "d")
++                           (match_operand:SI 3 "register_operand" "d"))))
++   (clobber (match_scratch:SI 4 "=h"))
++   (clobber (match_scratch:SI 5 "=X"))
++   (clobber (match_scratch:SI 6 "=X"))]
    "ISA_HAS_MADD_MSUB"
-   "@
-    msub\t%2,%3
+-  "@
+-   msub\t%2,%3
 -   #
-    #"
+-   #"
 -  [(set_attr "type"     "imadd,multi,multi")
-+  [(set_attr "type"     "imadd,multi")
++  "msub\t%2,%3"
++  [(set_attr "type"     "imadd")
     (set_attr "mode"     "SI")
 -   (set_attr "length"   "4,8,8")])
-+   (set_attr "length"   "4,8")])
++   (set_attr "length"   "4")])
  
  ;; Split the above insn if we failed to get LO allocated.
  (define_split
