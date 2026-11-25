@@ -105,6 +105,7 @@ to it.
 | 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical, linked from source |
 | 0x141410-0x141484 | `btEmptyCollisionAlgorithm.cpp` | identical, linked from source (with `btCollisionAlgorithm`'s vtable, typeinfo and destructors) |
 | 0x141490-0x141DE4 | `btManifoldResult.cpp` | identical, linked from source (`.bss` 0x62C658: `gContactAddedCallback`) |
+| 0x141DE4-0x142E74 | `btSphereBoxCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20ADF7; `getSphereDistance` since the `div.s` / `sqrt.s` latency, notes/COMPILER.md) |
 | 0x142E74-0x1432EC | `btSphereSphereCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE41) |
 | 0x1432EC-0x143834 | `btSphereTriangleCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE89) |
 | 0x143834-0x143B14 | `btBoxShape.cpp` | identical, linked from source (its inline functions 0x1D95DC-0x1DA010, `getEdge` at 0x1D95FC) |
@@ -119,8 +120,10 @@ to it.
 | 0x15020C-0x150AAC | `btTriangleMeshShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20B150; `getAabb` since the compiler's pseudo register numbers) |
 | 0x15183C-0x15186C | `btConvexCast.cpp` | identical, linked from source |
 | 0x15186C-0x151954 | `btGjkEpaPenetrationDepthSolver.cpp` | identical, linked from source |
+| 0x151954-0x15256C | `btGjkPairDetector.cpp` | identical, linked from source (`.bss` 0x62C660: `gNumGjkChecks`, `gNumDeepPenetrationChecks`; `getClosestPoints` since the `div.s` / `sqrt.s` latency) |
 | 0x15256C-0x153080 | `btPersistentManifold.cpp` | identical, linked from source (`.data` 0x2479D4: `gContactBreakingThreshold`; `.bss` 0x62C668: `gContactProcessedCallback`, `gContactDestroyedCallback`) |
 | 0x153080-0x153B64 | `btRaycastCallback.cpp` | identical, linked from source (`.gcc_except_table` 0x20B1C4) |
+| 0x156060-0x1587B0 | `btConeTwistConstraint.cpp` | identical, linked from source (`solveConstraint` since the `div.s` / `sqrt.s` latency; its copy of `btPlaneSpace1` is the discarded one, `btStaticPlaneShape.cpp`'s is kept) |
 | 0x15CB88-0x15DC58 | `btPoint2PointConstraint.cpp` | identical, linked from source (`buildJacobian` since the compiler's pseudo register numbers) |
 | 0x16392C-0x163CB8 | `btTypedConstraint.cpp` | identical, linked from source (`.ctors` 0x1E4A54, `.dtors` 0x1E4B10, `.gcc_except_table` 0x20B25E, `.bss` 0x64C680: `static btRigidBody s_fixed`) |
 | 0x16AC90-0x16ACC0 | `btCollisionAlgorithm.cpp` | identical, linked from source |
