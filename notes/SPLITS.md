@@ -88,7 +88,17 @@ discarded duplicate; it does not keep the file from being linked. Two classes wh
 functions all look identical are not in the game: `btOdeJoint` and `btEmptyShape`
 (their typeinfo names `10btOdeJoint` / `12btEmptyShape` and the string `Empty` of
 `getName` are absent; their few-instruction constructors and destructors match other
-classes'). The `.eh_frame` entry a later file
+classes'). The game's `btOptimizedBvh.cpp` (0x147468-0x14E870) is the one from before
+Bullet commit `79b6f7a77219` (2008-08-26, which moved most of it into
+`BroadphaseCollision/btQuantizedBvh.cpp`): the typeinfo name `14btQuantizedBvh` is
+absent, `btOptimizedBvh`'s typeinfo (0x2426B8) has no base class, its vtable (0x2426DC)
+points into this range (D1 0x148830, D0 0x1484A4), and the file of commit
+`8eafab367fc2` (with the two game changes of `btQuantizedBvh.h` / `.cpp`) gives every
+function at the game's offset from 0x147468 up to `updateBvhNodes` (0x14C96C), the
+only one not identical (93.6 %: the last loop, one induction variable in the game,
+two in ours; 8 bytes shorter). In the game's tree the two files are therefore one
+(the other source changes between that commit and `66861ad3340a` are in code the game
+does not have, a default argument and the version number). The `.eh_frame` entry a later file
 has for its own, discarded copy of such a function holds the kept copy's address
 (0x2053D8 in `btSphereShape.cpp`'s block: 0x1D0178, `btConvexShape::~btConvexShape`
 linked from `btCapsuleShape.cpp`): `linkonce_symbols` in `decomp.toml`. A file with a static
