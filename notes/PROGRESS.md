@@ -8,3 +8,4 @@
 | 2026-11-25 | | 18100 bytes (0.91 %) | 215 | 19 / 50 | `btTypedConstraint.cpp` linked: first file with a static object (`.ctors`, `.dtors` and `.bss` pieces) |
 | 2026-11-25 | | 23632 bytes (1.19 %) | 288 | 22 / 54 | 20 Bullet files linked: `btBoxShape.cpp`, `btConvexConvexAlgorithm.cpp` and `btSphereTriangleCollisionAlgorithm.cpp` identical with the retail branch cost (compiler `4.0.4a`) |
 | 2026-11-25 | | 62916 bytes (3.18 %) | 354 | 27 / 62 | 25 Bullet files linked: `btGjkEpa2.cpp`, `btManifoldResult.cpp`, `btPersistentManifold.cpp`, `btRaycastCallback.cpp` and `SphereTriangleDetector.cpp` identical with the BSD host `qsort` |
+| 2026-11-25 | 3ae2306 | 122028 bytes (6.17 %) | 542 | 39 / 69 | First game translation unit linked from C++ (`unit_0000051C`, 0x51C-0xD6C, 8 functions): unit bounds from the `.eh_frame` CIEs, one agent per function (`decomp-region`) |
