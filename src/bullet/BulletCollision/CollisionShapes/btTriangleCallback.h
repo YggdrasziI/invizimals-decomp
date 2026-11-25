@@ -19,8 +19,6 @@ subject to the following restrictions:
 #include "LinearMath/btVector3.h"
 
 
-///The btTriangleCallback provides a callback for each overlapping triangle when calling processAllTriangles.
-///This callback is called by processAllTriangles for all btConcaveShape derived class, such as  btBvhTriangleMeshShape, btStaticPlaneShape and btHeightfieldTerrainShape.
 class btTriangleCallback
 {
 public:

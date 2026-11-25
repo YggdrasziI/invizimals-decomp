@@ -43,18 +43,24 @@ the GitHub tag `R_2_0_0` of libexpat), **unmodified**. License: MIT (`src/expat/
 Written for this project: `include/expat/expat_config.h` (the build configuration,
 in place of the configure script's output) and `include/libc/` (minimal declarations).
 
-## Bullet Physics, trunk 66861ad3340a (`src/bullet`)
+## Bullet Physics, trunk 110e8313dab1 (`src/bullet`)
 
 The game links Bullet Physics from its trunk between the 2.70 and 2.71 releases
-(`notes/SPLITS.md`, `notes/COMPILER.md`): function by function, the closest snapshot
-is commit `66861ad3340a` of [bulletphysics/bullet3](https://github.com/bulletphysics/bullet3)
-("bump up version to 2.71", 2008-08-29; `VERSION` says 2.71), and functions it gives
-identical are lost from the next commits on. `src/bullet` holds the `*.cpp` and `*.h`
-of `src/LinearMath`, `src/BulletCollision` and `src/BulletDynamics`, the three headers
-of `src/` (`btBulletCollisionCommon.h`, `btBulletDynamicsCommon.h`, `Bullet-C-Api.h`)
-and `BulletLicense.txt` of the GitHub archive of that commit
-(`codeload.github.com/bulletphysics/bullet3/tar.gz/66861ad3340a`, SHA-256
-`0ad18ad474832805d795e958980cfcae55aec3e704a85cb73254daf93ec09afb`). License: zlib
+(`notes/SPLITS.md`, `notes/COMPILER.md`). Function by function, commit `66861ad3340a`
+("bump up version to 2.71", 2008-08-29) and the ones before it back to the split of
+`btOptimizedBvh` give the same identical functions, and the next commits lose some.
+The game's `btOptimizedBvh.cpp` is the one from before that split (commit
+`79b6f7a77219`, 2008-08-26, which moved most of it into a new `btQuantizedBvh.cpp`;
+evidence in `notes/SPLITS.md`), so `src/bullet` is the last commit before it,
+`110e8313dab1` of [bulletphysics/bullet3](https://github.com/bulletphysics/bullet3)
+(2008-08-26; it only changed the Doxyfile). The commits from there to `66861ad3340a`
+change code the game does not have, comments, a default argument and the version
+number. `src/bullet` holds the `*.cpp` and `*.h` of `src/LinearMath`,
+`src/BulletCollision` and `src/BulletDynamics`, the three headers of `src/`
+(`btBulletCollisionCommon.h`, `btBulletDynamicsCommon.h`, `Bullet-C-Api.h`) and
+`BulletLicense.txt` of the GitHub archive of that commit
+(`codeload.github.com/bulletphysics/bullet3/tar.gz/110e8313dab1`, SHA-256
+`7a75bda5ffc47d6c9721c7070a1755b288588db81f7eaaca40c53289643bb088`). License: zlib
 (`src/bullet/BulletLicense.txt`); line endings normalized to LF. Files changed for the
 game's build are marked as such at their top (zlib license, clause 2) and listed here;
 each change is a reconstruction from the game's code, not a copy of other code:
@@ -71,12 +77,12 @@ each change is a reconstruction from the game's code, not a copy of other code:
 - `LinearMath/btAlignedAllocator.h`: `btAlignedAlloc` and `btAlignedFree` call the
   game's allocator (0xBDE8 with alignment, size and the calling file's name, 0xBE04),
   as every Bullet function of the game does.
-- `BulletCollision/BroadphaseCollision/btQuantizedBvh.h`: `btQuantizedBvhNode`
+- `BulletCollision/CollisionShapes/btOptimizedBvh.h`: `btQuantizedBvhNode`
   without `ATTRIBUTE_ALIGNED16` (the upstream declaration, commented out there):
   `btOptimizedBvh::build` (0x14E194) keeps a temporary of that type at `sp+0x14`,
   which a 16-byte aligned type cannot have; with the change the function is
   identical and no other function of the library changes.
-- `BulletCollision/BroadphaseCollision/btQuantizedBvh.cpp`:
+- `BulletCollision/CollisionShapes/btOptimizedBvh.cpp`:
   `walkStacklessQuantizedTreeAgainstRay` sets a zero component of the inverse ray
   direction to 1.0 instead of 1e30, as the upstream comment above those lines says:
   the game's function (0x14AED0) tests each component against zero and stores the

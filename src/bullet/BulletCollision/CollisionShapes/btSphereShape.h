@@ -19,7 +19,7 @@ subject to the following restrictions:
 #include "btConvexInternalShape.h"
 #include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h" // for the types
 
-///The btSphereShape implements an implicit sphere, centered around a local origin with radius.
+///btSphereShape implements an implicit (getSupportingVertex) Sphere
 ATTRIBUTE_ALIGNED16(class) btSphereShape : public btConvexInternalShape
 
 {

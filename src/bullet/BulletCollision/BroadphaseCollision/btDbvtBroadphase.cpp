@@ -320,9 +320,7 @@ return(m_paircache);
 //
 void							btDbvtBroadphase::getBroadphaseAabb(btVector3& aabbMin,btVector3& aabbMax) const
 {
-
-	ATTRIBUTE_ALIGNED16(btDbvtVolume)	bounds;
-
+btDbvtVolume	bounds;
 if(!m_sets[0].empty())
 	if(!m_sets[1].empty())	Merge(	m_sets[0].m_root->volume,
 									m_sets[1].m_root->volume,bounds);

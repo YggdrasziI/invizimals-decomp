@@ -27,7 +27,7 @@ subject to the following restrictions:
 #include <cfloat>
 #include <float.h>
 
-#define BT_BULLET_VERSION 271
+#define BT_BULLET_VERSION 270
 
 inline int	btGetVersion()
 {
@@ -140,7 +140,6 @@ inline int	btGetVersion()
 #endif
 #endif
 
-///The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
 #if defined(BT_USE_DOUBLE_PRECISION)
 typedef double btScalar;
 #else

@@ -20,7 +20,7 @@ subject to the following restrictions:
 #include "btStridingMeshInterface.h"
 
 
-///The btTriangleMeshShape is an internal concave triangle mesh interface. Don't use this class directly, use btBvhTriangleMeshShape instead.
+///Concave triangle mesh interface. Don't use this class directly, use btBvhTriangleMeshShape instead.
 class btTriangleMeshShape : public btConcaveShape
 {
 protected:
