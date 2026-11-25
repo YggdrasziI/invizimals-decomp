@@ -8,7 +8,11 @@ typedef unsigned int size_t;
 typedef int ptrdiff_t;
 
 #ifndef NULL
+#ifdef __cplusplus
+#define NULL __null
+#else
 #define NULL ((void *)0)
+#endif
 #endif
 
 #define offsetof(type, member) __builtin_offsetof(type, member)
