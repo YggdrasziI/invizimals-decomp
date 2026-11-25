@@ -145,3 +145,11 @@ LBP-PSP-Decomp kit patches them (GPL-3.0-or-later, commit `754764d14759`): writt
 this project, marked GPL-3.0-or-later, it appends 131 fixed registers to the register
 tables. Neither GCC nor the kit is copied into the repository;
 `tools/gcc/build_404a.sh` applies the diff to the kit's work tree.
+
+## GCC change (`tools/gcc/insv-4.0.4.diff`)
+
+A diff of `gcc/config/mips/mips.md` of GCC 4.0.4 as the pspdev patch and the
+LBP-PSP-Decomp kit change it (GPL-2.0-or-later and GPL-3.0-or-later, kit commit
+`754764d14759`): written for this project, marked GPL-3.0-or-later, it changes one
+operand predicate of the `insv` expander. Neither GCC nor the kit is copied into the
+repository; `tools/gcc/build_404a.sh` applies the diff to the kit's work tree.

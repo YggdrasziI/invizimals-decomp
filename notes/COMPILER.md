@@ -248,6 +248,18 @@ in LO, the accumulator tied to the result), the Bullet sweep goes 1194 -> 1199 o
 Adopted in the same diff. The exact retail pattern is still not known, only this
 behaviour.
 
+**insv** (2026-11-25). A store into a bit field in memory: the game loads the word,
+inserts each field with `ins` from a register and stores the word back
+(`btVoronoiSimplexSolver::closestPtPointTetrahedron`, 0x155114, the `usedVertex*`
+copies: `ext a0,v1,2,1` / `ins v0,v1,1,1` / `ins v0,a0,2,1`); ours had `andi` / `sll`
+/ `or` with `ins v0,$0,...` clears, two fields cleared at once. The `insv` expander of
+the pspdev patch accepts a memory operand (`nonimmediate_operand`) and then fails for
+it, as `mips_use_ins_ext_p` wants a register, so `store_bit_field` (`expmed.c`) falls
+back to `store_fixed_bit_field`. With a `register_operand` predicate, `store_bit_field`
+copies the word to a register first and the insertion is an `ins`: Bullet sweep
+1199 -> 1200 of 1682, none lost; the same with `extzv` changed too. Adopted in build
+`4.0.4a`: `tools/gcc/insv-4.0.4.diff`.
+
 **Pseudo register numbers** (2026-11-25). In `btPolyhedralConvexShape::getAabb`
 (0x14E9D0) the only difference was that the loads at `trans+16` and `trans+32` get
 `$a0` / `$a1` swapped. Their pseudos are made by GCSE PRE (`pre_delete`, `gcse.c`),

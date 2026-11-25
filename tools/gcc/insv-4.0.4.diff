@@ -1,0 +1,26 @@
+SPDX-License-Identifier: GPL-3.0-or-later
+Bit-field stores of the game's retail compiler (notes/COMPILER.md, "insv"), for the
+build psp-gcc-4.0.4a: the LBP-PSP-Decomp kit's psp-gcc-4.0.4c work tree plus this
+diff and the other diffs of tools/gcc (tools/gcc/build_404a.sh).
+Applies with `patch -p1` in gcc-4.0.4/ after them.
+The insv expander (from the pspdev GCC patch the kit applies) takes a memory operand
+and then fails for it (mips_use_ins_ext_p wants a register), so a store into a bit
+field in memory falls back to and / shift / or. The game loads the word, inserts
+with `ins` from a register and stores it back (btVoronoiSimplexSolver::
+closestPtPointTetrahedron, 0x155114: `ins v0,v1,1,1`): with a register_operand
+predicate, store_bit_field (expmed.c) copies the memory word to a register first, as
+it does for a machine whose insv only inserts into registers. Bullet sweep 1199 ->
+1200 of 1682 (with the inline functions), none lost.
+GCC code is GPL-2.0-or-later (GCC 4.0.4, the pspdev patch) and the kit's context
+GPL-3.0-or-later.
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -2845,7 +2845,7 @@
+ 
+ 
+ (define_expand "insv"
+-  [(set (zero_extract (match_operand 0 "nonimmediate_operand")
++  [(set (zero_extract (match_operand 0 "register_operand")
+ 		      (match_operand 1 "immediate_operand")
+ 		      (match_operand 2 "immediate_operand"))
+ 	(match_operand 3 "reg_or_0_operand"))]
