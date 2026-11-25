@@ -56,7 +56,9 @@ rename_sections = [".rodata.cst4=.rodata.cst4,alloc,load,readonly,data,contents"
 
 # tools/common/try_unit.py: the code not split into units is all in text.s
 [try]
-compile = "{cc} -c {flags} -Iinclude -Isrc -o {obj} {src}"
+# through compile.py as the build does: the kit's assembler needs the lwl/lwr/swl/swr
+# GCC emits for copies of unaligned structures written as words (`unaligned_words`)
+compile = "{python} tools/psp/compile.py --unaligned-words tools/binutils/mips-ps2-decompals-objcopy{exe} {obj} {cc} -c {flags} -Iinclude -Isrc -o {obj} {src}"
 target = "build/{version}/asm/{version}/eboot/{piece}.s.o"
 
 # Code regions of the progress card (tools/common/progress_badges.py), grouped from
