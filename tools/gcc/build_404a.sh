@@ -3,8 +3,9 @@
 # tools/gcc/block-move-4.0.4.diff (notes/COMPILER.md, "Block copies"),
 # tools/gcc/allegrex-sched-4.0.4.diff ("Scheduling latencies"),
 # tools/gcc/branch-cost-4.0.4.diff ("Branch cost"),
-# tools/gcc/host-qsort-4.0.4.diff ("Host qsort") and
-# tools/gcc/madd-4.0.4.diff ("madd").
+# tools/gcc/host-qsort-4.0.4.diff ("Host qsort"),
+# tools/gcc/madd-4.0.4.diff ("madd") and
+# tools/gcc/hard-regs-4.0.4.diff ("Pseudo register numbers").
 #
 # Run after the kit's `build.sh 4.0.4c`, with the same environment: it copies the
 # 4.0.4c work tree ($LBP_GCC4_WORK/psp-gcc-4.0.4c), applies the diffs, rebuilds cc1 and
@@ -30,6 +31,7 @@ cp -a "$WORK/psp-gcc-4.0.4c" "$W"
 (cd "$W/gcc-4.0.4" && patch -p1 -F0 --no-backup-if-mismatch < "$HERE/branch-cost-4.0.4.diff" > ../patch-branch-cost.log)
 (cd "$W/gcc-4.0.4" && patch -p1 -F0 --no-backup-if-mismatch < "$HERE/host-qsort-4.0.4.diff" > ../patch-host-qsort.log)
 (cd "$W/gcc-4.0.4" && patch -p1 -F0 --no-backup-if-mismatch < "$HERE/madd-4.0.4.diff" > ../patch-madd.log)
+(cd "$W/gcc-4.0.4" && patch -p1 -F0 --no-backup-if-mismatch < "$HERE/hard-regs-4.0.4.diff" > ../patch-hard-regs.log)
 (cd "$W/build/gcc" && make -j"$JOBS" cc1 cc1plus MAKEINFO=true CFLAGS="$HF" > ../make-4.0.4a.log 2>&1) \
   || { tail -20 "$W/build/make-4.0.4a.log"; exit 1; }
 cp -a "$ROOT/psp-gcc-4.0.4c" "$P"

@@ -132,3 +132,11 @@ it appends a `qsort`, the 4.4BSD algorithm (Bentley and McIlroy; the one of newl
 Regents of the University of California, notice kept in the code. Neither GCC nor
 the kit is copied into the repository; `tools/gcc/build_404a.sh` applies the diff to
 the kit's work tree.
+
+## GCC change (`tools/gcc/hard-regs-4.0.4.diff`)
+
+A diff of `gcc/config/mips/mips.h` and `mips.c` of GCC 4.0.4 (GPL-2.0-or-later) as the
+LBP-PSP-Decomp kit patches them (GPL-3.0-or-later, commit `754764d14759`): written for
+this project, marked GPL-3.0-or-later, it appends 131 fixed registers to the register
+tables. Neither GCC nor the kit is copied into the repository;
+`tools/gcc/build_404a.sh` applies the diff to the kit's work tree.
