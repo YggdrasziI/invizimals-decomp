@@ -10,7 +10,8 @@ them. A split that builds proves the bytes, not a translation unit.
 | 0x0 | | `bin elf_header` | ELF header, program headers |
 | 0xC0 | 0x0 | `asm text` | `.init`, `.text` from 0x30 |
 | 0x5DC | 0x51C | `cpp unit_0000051C` | one game translation unit, 0x51C-0xD6C (below) |
-| 0xE2C | 0xD6C | `asm text_00000D6C` | `.text` to 0x18CD0 |
+| 0xE2C | 0xD6C | `asm text_00000D6C` | one game translation unit, 0xD6C-0x20C0, NonMatching: `src/unit_00000D6C.cpp` is compiled for the report only (below) |
+| 0x2180 | 0x20C0 | `asm text_000020C0` | `.text` to 0x18CD0 |
 | 0x18D90 | 0x18CD0 | `c unit_00018CD0` | `func_00018CD0` only; bounds are the function's own (hypothesis: the translation unit is not known) |
 | 0x18DB0 | 0x18CF0 | `asm text_00018CF0` | `.text` to 0x1805B8 |
 | 0x180678 | 0x1805B8 | `c expat/xmlrole` | expat 2.0.0 `xmlrole.c`, whole file (below) |
@@ -75,7 +76,7 @@ Bullet file: its `.text`, its `.eh_frame` block (CIE + FDEs), and its
 | Range | Unit | Status |
 |---|---|---|
 | 0x51C-0xD6C | `unit_0000051C` (CIE 0x1E4B1C, 5 FDEs, 3 leaf functions) | identical, linked from source; `.eh_frame` 0x1E4B1C-0x1E4BF0, `.rodata.cst4` 0x212740-0x21274C (2.0f, FLT_MAX, 0.5f) |
-| 0xD6C-0x20C0 | next unit (CIE 0x1E4BF0) | 22 of 27 functions identical in isolation; open: the static initialisation (0x202C, 0x209C, 0x20A8: an object at 0x2481DC, constructor 0x95170), 0x126C / 0x12B4 (`mult` by 0xCCCCCCCD, `notes/COMPILER.md`), 0x14B8 (one `lwr` with a `%lo` operand, which `compile.py --unaligned-words` cannot write yet); its globals 0x248320-0x24833C are also used by the leaf functions 0xD6C-0xDA0, which therefore belong to it |
+| 0xD6C-0x20C0 | `unit_00000D6C` (CIE 0x1E4BF0) | NonMatching (report only): 15 of 17 named functions identical, 0x126C / 0x12B4 short of the `mult` by 0xCCCCCCCD (`notes/COMPILER.md`); the static initialisation (0x202C, 0x209C, 0x20A8) is identical but unpaired in the report (compiler names). Its static objects: `TActionsDialogListener` at 0x2481DC (vtable 0x23A260, base `TPSPDialogs::CPSPDialogsListener` 0x23A2E8, names from the RTTI strings 0x23A2A4 / 0x23A2CC) and the object at 0x2481E8 (constructor 0x95170). Its inline virtual functions are the linkonce copies 0x1BA0E4-0x1BA464, its strings the `.rodata.str1.4` block from 0x216248 (the first three are those of the linkonce copies). Its globals 0x248320-0x24833C are also used by the leaf functions 0xD6C-0xDA0 and 0x20B4, which therefore belong to it; 0x20B4 comes after the static initialisation in the game, before it in our object (to solve before linking) |
 
 The start-up code loads the start of `.eh_frame` (0x1E4B1C); since that block comes
 from `unit_0000051C`, the address is given in `config/UCES01241/eboot.symbols.ld`.

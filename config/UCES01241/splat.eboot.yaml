@@ -64,7 +64,8 @@ segments:
     subsegments:
       - [0xC0, asm, text]                  # .init .text .fini
       - [0x5DC, cpp, unit_0000051C]        # one translation unit (own .eh_frame CIE)
-      - [0xE2C, asm, text_00000D6C]
+      - [0xE2C, asm, text_00000D6C]        # NonMatching unit (src/unit_00000D6C.cpp, report only)
+      - [0x2180, asm, text_000020C0]
       - [0x18D90, c, unit_00018CD0]        # func_00018CD0 alone (bounds: hypothesis)
       - [0x18DB0, asm, text_00018CF0]
       - [0x13C87C, cpp, bullet/BulletCollision/CollisionDispatch/btCollisionObject]

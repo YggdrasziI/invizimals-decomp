@@ -36,6 +36,10 @@ Game code is C++; until names are proven, functions and data are declared
   stored as zero, `bool` instead of `unsigned char` for a byte global: each removes
   a reload the game does not have, or moves a load above stores (0x113C, 0x1E60,
   0x14B8).
+- **Merging a unit: one type per field.** Where two functions disagree on a field's
+  type (`void *` and `int` at the same offset), an `enum` type often satisfies both:
+  `Action::type` and `Cursor::state` are enums in `unit_00000D6C` (0x113C and 0x1E60
+  identical again after the merge; `int` gives 41 % / 93 %).
 - **A loop counter stored once after the loop**: a plain `for` with `member++` in
   the body (0x113C).
 - **`%hi` kept in a saved register and `%lo` added at each use**: declare the global
@@ -49,6 +53,10 @@ Game code is C++; until names are proven, functions and data are declared
 
 ## Not source problems
 
+- In a NonMatching (report-only) unit, the static initialisation functions keep the
+  compiler's names (`_Z41__static_initialization_and_destruction_0ii`,
+  `_GLOBAL__I_<first global>`), which objdiff does not pair with `func_<addr>`;
+  an `__asm__` label on a constructor declaration is ignored by 4.0.4 (C1/C2 clones).
 - A float literal compared alone shows `[.rodata.cst4]` against `D_<addr>`: the
   literal's place, solved by linking the whole unit (its `.rodata.cst4` block).
 - `lui $vX, 0x25` without `%hi`: splat could not pair a `%hi` with its `%lo` across a
