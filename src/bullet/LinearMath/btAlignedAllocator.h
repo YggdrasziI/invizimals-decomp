@@ -1,3 +1,7 @@
+/* Altered source version, not the original Bullet file: changed for the build of
+   the game (see notes/PROVENANCE.md). btAlignedAlloc and btAlignedFree call the
+   game's allocator. */
+
 /*
 Bullet Continuous Collision Detection and Physics Library
 Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
@@ -38,8 +42,13 @@ void	btAlignedFreeInternal	(void* ptr,int line,char* filename);
 	void*	btAlignedAllocInternal	(size_t size, int alignment);
 	void	btAlignedFreeInternal	(void* ptr);
 
-	#define btAlignedAlloc(a,b) btAlignedAllocInternal(a,b)
-	#define btAlignedFree(ptr) btAlignedFreeInternal(ptr)
+	// the game's own allocator (functions of the game, names unknown; parameter types
+	// are a hypothesis): alignment, size and the file of the call
+	extern "C" void*	func_0000BDE8	(int alignment, size_t size, const char* file);
+	extern "C" void	func_0000BE04	(void* ptr);
+
+	#define btAlignedAlloc(a,b) func_0000BDE8(b,a,__FILE__)
+	#define btAlignedFree(ptr) func_0000BE04(ptr)
 
 #endif
 typedef int	size_type;

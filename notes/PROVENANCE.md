@@ -68,6 +68,9 @@ each change is a reconstruction from the game's code, not a copy of other code:
   0x13FCC8; no division by the squared length);
 - `LinearMath/btQuaternion.h`: `operator*=` and `operator*(q1, q2)` with `vqmul.q`
   (first at 0x157F00).
+- `LinearMath/btAlignedAllocator.h`: `btAlignedAlloc` and `btAlignedFree` call the
+  game's allocator (0xBDE8 with alignment, size and the calling file's name, 0xBE04),
+  as every Bullet function of the game does.
 
 Written for this project: `include/cxx/` (minimal C and C++ declarations for Bullet).
 
