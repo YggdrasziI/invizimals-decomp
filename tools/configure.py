@@ -48,6 +48,7 @@ CC_FLAGS = (COMPILER_CONFIG["flags"] if COMPILER_CONFIG else "") + " -Iinclude -
 # game (notes/COMPILER.md); the deepest matching directory wins. `cwd`: the directory
 # the compiler runs in (paths of `flags` relative to it), as the original build did for
 # its `__FILE__` strings; `rename_sections`: tools/psp/compile.py --rename-section values
+# `linkonce_symbols = true`: tools/psp/compile.py --linkonce-symbols
 CC_DIRS = COMPILER_CONFIG.get("dirs", {}) if COMPILER_CONFIG else {}
 # unaligned_words = true: lwl/lwr/swl/swr written as .word for an assembler that
 # refuses them (tools/psp/compile.py --unaligned-words)
@@ -143,6 +144,8 @@ def dir_compiler(source: str) -> dict[str, str] | None:
     if "linux" not in entry or "flags" not in entry:
         sys.exit(f'decomp.toml: [compiler.dirs."{d}"] needs `linux` and `flags`')
     options = "".join(f"--rename-section {r} " for r in entry.get("rename_sections", []))
+    if entry.get("linkonce_symbols"):
+        options += "--linkonce-symbols "
     if "cwd" in entry:
         options += f"--cwd {entry['cwd']} "
     return {"cc": " ".join(posix(a) for a in project.linux_command(entry["linux"])),

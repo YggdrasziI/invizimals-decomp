@@ -234,4 +234,8 @@ there keeps its default.
 - one `.eh_frame` CIE per object, then its FDEs, not merged; `.gnu.linkonce.*`
   sections kept from the first file of the link (`btEmptyCollisionAlgorithm.cpp`'s
   copy of `btCollisionAlgorithm`'s vtable and destructors, before
-  `btCollisionAlgorithm.cpp`), GNU ld's rule for them too.
+  `btCollisionAlgorithm.cpp`), GNU ld's rule for them too;
+- an `.eh_frame` entry that describes a discarded `.gnu.linkonce.t` copy keeps its
+  place and holds the address of the copy the link kept (GNU ld 2.4x writes 0
+  there): the build points these relocations at the function's symbol
+  (`tools/psp/compile.py --linkonce-symbols`).

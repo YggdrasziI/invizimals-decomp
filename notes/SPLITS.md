@@ -79,12 +79,21 @@ content in the original. A whole C++ file is linked with its pieces at their pla
 out-of-line inline functions (`.gnu.linkonce.t.*`, in 0x1BA6D0+); its typeinfo, names
 and vtables (`.gnu.linkonce.r.*`, 0x2414xx-0x2436xx); its `.eh_frame` block (one CIE
 per object, then its FDEs) and its `.gcc_except_table`. A `.gnu.linkonce` section
-shared by several files is linked from the first one.
+shared by several files is linked from the first one. The `.eh_frame` entry a later file
+has for its own, discarded copy of such a function holds the kept copy's address
+(0x2053D8 in `btSphereShape.cpp`'s block: 0x1D0178, `btConvexShape::~btConvexShape`
+linked from `btCapsuleShape.cpp`): `linkonce_symbols` in `decomp.toml`.
 
 | Range | File | Status |
 |---|---|---|
 | 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical, linked from source |
 | 0x141410-0x141484 | `btEmptyCollisionAlgorithm.cpp` | identical, linked from source (with `btCollisionAlgorithm`'s vtable, typeinfo and destructors) |
+| 0x142E74-0x1432EC | `btSphereSphereCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE41) |
+| 0x1449BC-0x145360 | `btCapsuleShape.cpp` | identical, linked from source |
+| 0x145360-0x1456CC | `btCollisionShape.cpp` | identical, linked from source |
+| 0x146658-0x146C1C | `btConvexInternalShape.cpp` | identical, linked from source |
+| 0x14F17C-0x14F4E8 | `btSphereShape.cpp` | identical, linked from source |
+| 0x14F4E8-0x14FA60 | `btStaticPlaneShape.cpp` | identical, linked from source (`.gcc_except_table` 0x20B118) |
 | 0x1501AC-0x15020C | `btTriangleCallback.cpp` | identical, linked from source |
 | 0x15183C-0x15186C | `btConvexCast.cpp` | identical, linked from source |
 | 0x15186C-0x151954 | `btGjkEpaPenetrationDepthSolver.cpp` | identical, linked from source |
@@ -92,6 +101,7 @@ shared by several files is linked from the first one.
 | 0x16ACC0-0x16ACF0 | `btDispatcher.cpp` | identical, linked from source |
 | 0x16BA14-0x16BF34 | `btBoxBoxCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B40D) |
 | 0x17478C-0x1747EC | `btConcaveShape.cpp` | identical, linked from source |
+| 0x1747EC-0x174E40 | `btGjkConvexCast.cpp` | identical, linked from source (`.gcc_except_table` 0x20B718) |
 
 Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
 0x1ACE24-0x1AF818) hold more library code without telling strings; 0x1AC080, in the

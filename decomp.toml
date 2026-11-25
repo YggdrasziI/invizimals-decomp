@@ -45,6 +45,9 @@ flags = "-O2 -G0 -DHAVE_EXPAT_CONFIG_H -nostdinc -Iinclude/libc -Iinclude/expat"
 linux = "~/lbp-gcc4/psp-gcc-4.0.4a/bin/psp-gcc"
 flags = "-O3 -G0 -mpreferred-stack-boundary=4 -DNDEBUG -nostdinc -I../../include/cxx -I../../include/libc -I."
 cwd = "src/bullet"
+# an .eh_frame entry of an inline function another file's copy of which the link kept
+# holds that copy's address (0x2053D8: 0x1D0178), where GNU ld would write 0
+linkonce_symbols = true
 rename_sections = [".rodata.cst4=.rodata.cst4,alloc,load,readonly,data,contents",
                    ".rodata.cst8=.rodata.cst8,alloc,load,readonly,data,contents",
                    ".rodata.str1.4=.rodata.str1.4,alloc,load,readonly,data,contents"]
