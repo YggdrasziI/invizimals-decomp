@@ -94,6 +94,8 @@ script names the C++ object there and keeps the bss start unaligned
 | 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical, linked from source |
 | 0x141410-0x141484 | `btEmptyCollisionAlgorithm.cpp` | identical, linked from source (with `btCollisionAlgorithm`'s vtable, typeinfo and destructors) |
 | 0x142E74-0x1432EC | `btSphereSphereCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE41) |
+| 0x1432EC-0x143834 | `btSphereTriangleCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20AE89) |
+| 0x143834-0x143B14 | `btBoxShape.cpp` | identical, linked from source (its inline functions 0x1D95DC-0x1DA010, `getEdge` at 0x1D95FC) |
 | 0x1449BC-0x145360 | `btCapsuleShape.cpp` | identical, linked from source |
 | 0x145360-0x1456CC | `btCollisionShape.cpp` | identical, linked from source |
 | 0x146658-0x146C1C | `btConvexInternalShape.cpp` | identical, linked from source |
@@ -106,6 +108,7 @@ script names the C++ object there and keeps the bss start unaligned
 | 0x16AC90-0x16ACC0 | `btCollisionAlgorithm.cpp` | identical, linked from source |
 | 0x16ACC0-0x16ACF0 | `btDispatcher.cpp` | identical, linked from source |
 | 0x16BA14-0x16BF34 | `btBoxBoxCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B40D) |
+| 0x1717A0-0x172204 | `btConvexConvexAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B5CD, `.bss` 0x64C878: `bool disableCcd`) |
 | 0x17478C-0x1747EC | `btConcaveShape.cpp` | identical, linked from source |
 | 0x1747EC-0x174E40 | `btGjkConvexCast.cpp` | identical, linked from source (`.gcc_except_table` 0x20B718) |
 
