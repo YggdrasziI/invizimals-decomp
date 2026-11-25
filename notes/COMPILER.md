@@ -131,7 +131,8 @@ other instruction types to `generic.md`. The retail compiler's values differ for
 of them. Method: one `cc1plus` per variant of the description, every Bullet file
 compiled with the build method below, every function searched in the original
 (relocated fields masked); a variant is kept when it adds identical functions and
-loses none. 994 functions, 443 identical with the kit's description (and `fcvt` 2,
+loses none (`tools/psp/gcc_sched_scan.py` with `library_sweep.py`; the scheduler's
+decisions for one function: `tools/psp/gcc_rtl_trace.py`). 994 functions, 443 identical with the kit's description (and `fcvt` 2,
 the first value found: `btQuantizedBvh::reportAabbOverlappingNodex`, 0x14B804, has an
 independent load between each `trunc.w.s` and its `mfc1`).
 
