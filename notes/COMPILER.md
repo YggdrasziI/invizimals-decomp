@@ -161,6 +161,17 @@ function changes (12/12). Adopted in build `4.0.4a`:
 block-copy diff. Scheduler options (`-fno-sched-*`, `-fsched2-use-*`) do not help
 the near misses that remain.
 
+Rescan of 2026-11-25, with the branch cost and host `qsort` below (546 identical):
+every adopted value is still the best (any other value of `fadd`, single `fmul`,
+the moves, `fcmp`, `fcvt`, `xfer`, `imul`, the loads split by kind, `arith`,
+`const`, `slt`, `shift`, `call` loses functions). Open: a single-precision
+`fsqrt` of 18 to 24 (generic: 54) makes `btGjkPairDetector::getClosestPoints`
+(0x151954, 735 instructions) identical, but changes the order around `sqrt.s` in
+three inline functions of `btGjkEpa2.cpp` (0x1DE2C4, 0x1DE9B4, 0x1DF248) that are
+identical with 54; 25 and more keep those and lose the first. No single latency
+fits both: not adopted. The sweep only scores `.text` functions, so a change must
+also pass the full build (the inline functions of the linked files).
+
 **Branch cost** (2026-11-25). `BRANCH_COST` (`config/mips/mips.h`) is 2 for the
 Allegrex in the kit; the retail compiler behaves as with 3. The if-conversion pass
 moves a block before the branch that skips it when the block costs less than
