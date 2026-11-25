@@ -63,6 +63,8 @@ segments:
     align: 4
     subsegments:
       - [0xC0, asm, text]                  # .init .text .fini
+      - [0x5DC, cpp, unit_0000051C]        # one translation unit (own .eh_frame CIE)
+      - [0xE2C, asm, text_00000D6C]
       - [0x18D90, c, unit_00018CD0]        # func_00018CD0 alone (bounds: hypothesis)
       - [0x18DB0, asm, text_00018CF0]
       - [0x13C87C, cpp, bullet/BulletCollision/CollisionDispatch/btCollisionObject]
@@ -297,7 +299,8 @@ segments:
       - { start: 0x1E4BD0, type: .rodata, name: bullet/BulletDynamics/ConstraintSolver/btTypedConstraint, linker_section: .dtors }
       - [0x1E4BD4, rodata, rodata_001E4B14]
       - [0x1E4BD8, rodata, rodata_001E4B18]
-      - [0x1E4BDC, rodata, eh_frame]       # .eh_frame .gcc_except_table
+      - { start: 0x1E4BDC, type: .rodata, name: unit_0000051C, linker_section: .eh_frame }
+      - [0x1E4CB0, rodata, eh_frame]       # .eh_frame .gcc_except_table
       - { start: 0x2038B4, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .eh_frame }
       - [0x2038E0, rodata, eh_frame_00203820]
       - { start: 0x203F54, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btEmptyCollisionAlgorithm, linker_section: .eh_frame }
@@ -388,6 +391,9 @@ segments:
       - [0x20E1A0, rodata, rodata_0020E0E0]
       - [0x20E6E4, .rodata, expat/xmlrole]
       - [0x20EA08, rodata, rodata_0020E948]
+      - { start: 0x212800, type: .rodata, name: unit_0000051C, linker_section: .rodata.cst4 }
+      - [0x21280C, rodata, rodata_0021274C]
+      - [0x212810, rodata, rodata_00212750] # 8-aligned start: the file holds doubles
       - { start: 0x215BF4, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btCollisionObject, linker_section: .rodata.cst4 }
       - [0x215C04, rodata, rodata_00215B44]
       - [0x215C08, rodata, rodata_00215B48] # 8-aligned start: the file holds doubles

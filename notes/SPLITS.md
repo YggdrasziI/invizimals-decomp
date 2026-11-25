@@ -9,6 +9,8 @@ them. A split that builds proves the bytes, not a translation unit.
 |---|---|---|---|
 | 0x0 | | `bin elf_header` | ELF header, program headers |
 | 0xC0 | 0x0 | `asm text` | `.init`, `.text` from 0x30 |
+| 0x5DC | 0x51C | `cpp unit_0000051C` | one game translation unit, 0x51C-0xD6C (below) |
+| 0xE2C | 0xD6C | `asm text_00000D6C` | `.text` to 0x18CD0 |
 | 0x18D90 | 0x18CD0 | `c unit_00018CD0` | `func_00018CD0` only; bounds are the function's own (hypothesis: the translation unit is not known) |
 | 0x18DB0 | 0x18CF0 | `asm text_00018CF0` | `.text` to 0x1805B8 |
 | 0x180678 | 0x1805B8 | `c expat/xmlrole` | expat 2.0.0 `xmlrole.c`, whole file (below) |
@@ -57,6 +59,26 @@ only where a string gives one.
 | 0x1AC2A0-0x1ACE24 | libsas wrappers (SDK: hypothesis) | thin wrappers of every `__sceSas*` import |
 | 0x1AF818-0x1BA6D0 | C library (reentrancy, stdio, locale, number formatting) | `_getmodreent`, `libc:%s: no reent structure`, `C-UTF-8`, `Infinity`, `e%ld` |
 | 0x1BA6D0-0x1E3294 | inline functions and template instances (`.gnu.linkonce.t.*` placed after the rest: hypothesis) | tiny game getters returning names (`menu_theme`, capture names in near-alphabetical class order), Bullet `btAlignedObjectArray` templates (`./LinearMath/btAlignedAllocator.h`), SDK calls of the game (`sceNpRoster*`, `sceG729*`) |
+
+### Game translation units
+
+Each object compiled with unwind tables has its own CIE in `.eh_frame`, followed by
+the FDEs of its functions in address order (285 CIEs, 3839 FDEs): a CIE starts a
+translation unit. The game's units follow one another in `.text` in the order of
+their CIEs. A function without an FDE belongs to the unit around it: the compiler
+leaves out the FDE of a function that cannot throw and needs no unwinding (leaf
+functions). A unit can also have FDEs of out-of-line inline functions and template
+instances, which lie in 0x1BA144 and after. Such a unit is linked as a whole, like a
+Bullet file: its `.text`, its `.eh_frame` block (CIE + FDEs), and its
+`.rodata.cst4` / strings when it has them.
+
+| Range | Unit | Status |
+|---|---|---|
+| 0x51C-0xD6C | `unit_0000051C` (CIE 0x1E4B1C, 5 FDEs, 3 leaf functions) | identical, linked from source; `.eh_frame` 0x1E4B1C-0x1E4BF0, `.rodata.cst4` 0x212740-0x21274C (2.0f, FLT_MAX, 0.5f) |
+| 0xD6C-0x20C0 | next unit (CIE 0x1E4BF0) | 22 of 27 functions identical in isolation; open: the static initialisation (0x202C, 0x209C, 0x20A8: an object at 0x2481DC, constructor 0x95170), 0x126C / 0x12B4 (`mult` by 0xCCCCCCCD, `notes/COMPILER.md`), 0x14B8 (one `lwr` with a `%lo` operand, which `compile.py --unaligned-words` cannot write yet); its globals 0x248320-0x24833C are also used by the leaf functions 0xD6C-0xDA0, which therefore belong to it |
+
+The start-up code loads the start of `.eh_frame` (0x1E4B1C); since that block comes
+from `unit_0000051C`, the address is given in `config/UCES01241/eboot.symbols.ld`.
 
 ### expat 2.0.0 files
 
