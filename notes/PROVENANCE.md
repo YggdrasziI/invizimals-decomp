@@ -111,3 +111,12 @@ LBP-PSP-Decomp kit patches it (GPL-3.0-or-later, commit `754764d14759`): written
 this project, marked GPL-3.0-or-later, it changes one macro (`BRANCH_COST` for the
 Allegrex). Neither GCC nor the kit is copied into the repository;
 `tools/gcc/build_404a.sh` applies the diff to the kit's work tree.
+
+## GCC change (`tools/gcc/host-qsort-4.0.4.diff`)
+
+A diff of `gcc/config/mips/mips.c` of GCC 4.0.4 as the LBP-PSP-Decomp kit patches it:
+it appends a `qsort`, the 4.4BSD algorithm (Bentley and McIlroy; the one of newlib's
+`libc/search/qsort.c`) rewritten for this project, BSD-3-Clause, copyright The
+Regents of the University of California, notice kept in the code. Neither GCC nor
+the kit is copied into the repository; `tools/gcc/build_404a.sh` applies the diff to
+the kit's work tree.

@@ -1,0 +1,142 @@
+SPDX-License-Identifier: GPL-3.0-or-later AND BSD-3-Clause
+Host qsort of the game's retail compiler (notes/COMPILER.md, "Host qsort"), for the
+build psp-gcc-4.0.4a: the LBP-PSP-Decomp kit's psp-gcc-4.0.4c work tree plus this diff
+and the other diffs of tools/gcc (tools/gcc/build_404a.sh). Applies with `patch -p1`
+in gcc-4.0.4/ after them (it appends to config/mips/mips.c).
+GCC sorts the stack variables of a function by size with the host's qsort and no
+tie-break; with glibc (stable) equal-sized variables keep their order, with the BSD
+qsort of newlib (Cygwin) they do not from 7 variables on. A qsort defined in mips.c,
+a file of cc1 and cc1plus, replaces the C library's. Bullet sweep: 528 -> 546
+identical functions, none lost.
+The qsort is the 4.4BSD algorithm rewritten (BSD-3-Clause, The Regents of the
+University of California); GCC code is GPL-2.0-or-later and the kit's context
+GPL-3.0-or-later.
+--- a/gcc/config/mips/mips.c
++++ b/gcc/config/mips/mips.c
+@@ -10201,3 +10201,126 @@
+ }
+ 
+ #include "gt-mips.h"
++
++/* game: the host qsort of the retail compiler.  GCC sorts with comparison
++   functions that have ties (cfgexpand.c, stack_var_size_cmp: stack variables of
++   equal size), so the order depends on the host C library.  glibc's qsort is a
++   stable merge sort; the retail compiler behaves as built with the BSD qsort
++   (newlib, Cygwin), which is not stable from 7 elements on.  This definition
++   replaces the C library's in cc1 and cc1plus.
++
++   The algorithm is the 4.4BSD qsort (Bentley and McIlroy, "Engineering a Sort
++   Function"), rewritten here:
++   Copyright (c) 1992, 1993 The Regents of the University of California.
++   All rights reserved.  Redistribution and use in source and binary forms,
++   with or without modification, are permitted under the 3-clause BSD license
++   (see newlib/libc/search/qsort.c for the full text).  */
++typedef int bsd_cmp_t (const void *, const void *);
++
++static void
++bsd_swap (char *a, char *b, size_t n)
++{
++  while (n-- > 0)
++    {
++      char t = *a;
++      *a++ = *b;
++      *b++ = t;
++    }
++}
++
++static char *
++bsd_med3 (char *a, char *b, char *c, bsd_cmp_t *cmp)
++{
++  return cmp (a, b) < 0
++	 ? (cmp (b, c) < 0 ? b : (cmp (a, c) < 0 ? c : a))
++	 : (cmp (b, c) > 0 ? b : (cmp (a, c) < 0 ? a : c));
++}
++
++void
++qsort (void *base, size_t n, size_t es, bsd_cmp_t *cmp)
++{
++  char *a = (char *) base;
++  char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
++  long d, r;
++  int swap_cnt;
++
++loop:
++  swap_cnt = 0;
++  if (n < 7)
++    {
++      for (pm = a + es; pm < a + n * es; pm += es)
++	for (pl = pm; pl > a && cmp (pl - es, pl) > 0; pl -= es)
++	  bsd_swap (pl, pl - es, es);
++      return;
++    }
++  pm = a + (n / 2) * es;
++  if (n > 7)
++    {
++      pl = a;
++      pn = a + (n - 1) * es;
++      if (n > 40)
++	{
++	  d = (n / 8) * es;
++	  pl = bsd_med3 (pl, pl + d, pl + 2 * d, cmp);
++	  pm = bsd_med3 (pm - d, pm, pm + d, cmp);
++	  pn = bsd_med3 (pn - 2 * d, pn - d, pn, cmp);
++	}
++      pm = bsd_med3 (pl, pm, pn, cmp);
++    }
++  bsd_swap (a, pm, es);
++  pa = pb = a + es;
++
++  pc = pd = a + (n - 1) * es;
++  for (;;)
++    {
++      while (pb <= pc && (r = cmp (pb, a)) <= 0)
++	{
++	  if (r == 0)
++	    {
++	      swap_cnt = 1;
++	      bsd_swap (pa, pb, es);
++	      pa += es;
++	    }
++	  pb += es;
++	}
++      while (pb <= pc && (r = cmp (pc, a)) >= 0)
++	{
++	  if (r == 0)
++	    {
++	      swap_cnt = 1;
++	      bsd_swap (pc, pd, es);
++	      pd -= es;
++	    }
++	  pc -= es;
++	}
++      if (pb > pc)
++	break;
++      bsd_swap (pb, pc, es);
++      swap_cnt = 1;
++      pb += es;
++      pc -= es;
++    }
++  if (swap_cnt == 0)
++    {
++      for (pm = a + es; pm < a + n * es; pm += es)
++	for (pl = pm; pl > a && cmp (pl - es, pl) > 0; pl -= es)
++	  bsd_swap (pl, pl - es, es);
++      return;
++    }
++
++  pn = a + n * es;
++  r = (pa - a) < (pb - pa) ? (pa - a) : (pb - pa);
++  if (r > 0)
++    bsd_swap (a, pb - r, r);
++  r = (pd - pc) < (pn - pd - (long) es) ? (pd - pc) : (pn - pd - (long) es);
++  if (r > 0)
++    bsd_swap (pb, pn - r, r);
++  if ((r = pb - pa) > (long) es)
++    qsort (a, r / es, es, cmp);
++  if ((r = pd - pc) > (long) es)
++    {
++      a = pn - r;
++      n = r / es;
++      goto loop;
++    }
++}

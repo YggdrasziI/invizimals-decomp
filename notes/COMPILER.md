@@ -175,7 +175,24 @@ The eight gained include the near misses that scheduling did not explain:
 `btConvexConvexAlgorithm::processCollision` and `calculateTimeOfImpact`,
 `btQuantizedBvh::updateSubtreeHeaders` and `deSerializeInPlace`. Adopted in build
 `4.0.4a`: `tools/gcc/branch-cost-4.0.4.diff`. Not explored: values per optimisation
-level or for other costs (`mips_rtx_costs`).
+level. The arithmetic costs of `mips_rtx_costs` (float addition 2-4, single
+multiplication 4-5, double 5, division 12 and 30, integer division 35) change
+nothing on Bullet; an integer multiplication below 5 loses four functions.
+
+**Host qsort** (2026-11-25). GCC 4.0 sorts the stack variables of a function by size
+with the host's `qsort` and no tie-break (`cfgexpand.c`, `partition_stack_vars`,
+`stack_var_size_cmp`), so the stack slots of equal-sized variables depend on the C
+library the compiler was built with. glibc's `qsort` is a stable merge sort; the
+retail compiler behaves as built with the BSD `qsort` (the one of newlib, so of a
+Cygwin host: hypothesis, only the behaviour is proven), an insertion sort below 7
+elements and a quicksort that moves equal elements from 7 on. Symptom: a function
+with many temporaries of one size (`btVector3`) is identical but for stack offsets
+exchanged between two of them (`btManifoldResult::addContactPoint`, 0x141748: slots
+0x30-0x3C and 0x0-0xC). With a BSD `qsort` in `cc1` / `cc1plus`, the Bullet sweep
+goes from 528 to 546 identical functions, none lost (the variant without the
+switch to insertion sort when no swap happened gives the same). Adopted in build
+`4.0.4a`: `tools/gcc/host-qsort-4.0.4.diff` (appended to `config/mips/mips.c`).
+Every other `qsort` call of GCC gets it too.
 
 ### Adopted
 
