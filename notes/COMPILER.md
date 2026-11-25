@@ -194,6 +194,11 @@ switch to insertion sort when no swap happened gives the same). Adopted in build
 `4.0.4a`: `tools/gcc/host-qsort-4.0.4.diff` (appended to `config/mips/mips.c`).
 Every other `qsort` call of GCC gets it too.
 
+**Host word size** (2026-11-25): no effect. `HOST_WIDE_INT` is 64 bits on any host
+for a MIPS target (`need_64bit_hwint=yes` in `config.gcc`), and `cc1` / `cc1plus`
+built as 32-bit programs (i686 Linux, static) give the same 546 identical Bullet
+functions, none gained or lost.
+
 ### Adopted
 
 2026-11-24: `4.0.4c` at `-O2 -G0` is the `[compiler]` of `decomp.toml`. Built in WSL
