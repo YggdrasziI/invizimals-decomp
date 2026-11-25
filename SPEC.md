@@ -65,7 +65,7 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   open-source GCC 4.0.4 rebuilt with the pspdev Allegrex patch and the LBP-PSP-Decomp
   tuning (`4.0.4c`) at `-O2 -G0 -mpreferred-stack-boundary=4` reproduces all twelve probe functions
   (`notes/COMPILER.md`). The `[compiler]` of `decomp.toml` is `4.0.4a`: `4.0.4c` plus
-  the retail block copies (`tools/gcc/block-move-4.0.4.diff`, built by
+  the retail block copies and scheduling latencies (`tools/gcc/*.diff`, built by
   `tools/gcc/build_404a.sh`), a Linux program in `~/lbp-gcc4/psp-gcc-4.0.4a`, built
   from source (CI: cached), run through
   WSL on Windows (`tools/common/linux_run.py`). expat 2.0.0 (`src/expat`) was built

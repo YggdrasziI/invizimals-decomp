@@ -125,20 +125,40 @@ same as with `4.0.4c`. Adopted 2026-11-24 (owner's decision) as the `[compiler]`
 `decomp.toml`: `tools/gcc/block-move-4.0.4.diff` (GPL-3.0-or-later, GCC code), applied
 to the kit's `4.0.4c` work tree by `tools/gcc/build_404a.sh` (local and CI).
 
-Float conversion latency (2026-11-25). In the kit's Allegrex scheduling description
-(`config/mips/allegrex-sched.md`: loads 3, stores holding the memory unit) the other
-types keep `generic.md`'s latencies, `fcvt` (`trunc.w.s`, `cvt.s.w`...) 1. Bullet's
-`btQuantizedBvh::reportAabbOverlappingNodex` (0x14B804, 451 instructions) differs from
-the original only in two places, each a `trunc.w.s` followed by its `mfc1`: the
-original puts an independent load between them (`trunc.w.s`, `lwc1`, `mfc1`;
-`trunc.w.s`, `lw`, `mfc1`), `4.0.4c` issues the `mfc1` right after. With an
-`fcvt` latency of 2 the function is identical; 3 gives the same code on every Bullet
-file. Sweep of all Bullet files with the build method below: 442 functions found
-identical before, 443 with it, none lost. No probe function has a float conversion.
-Tried without effect on the other near misses: `fadd`, `fmul` and `call` latencies
-(shorter ones lose functions), scheduler options (`-fno-sched-*`, `-fsched2-use-*`).
-Adopted in build `4.0.4a`: `tools/gcc/allegrex-fcvt-4.0.4.diff`, applied by
-`tools/gcc/build_404a.sh` after the block-copy diff.
+Scheduling latencies (2026-11-25). The kit's Allegrex scheduling description
+(`config/mips/allegrex-sched.md`: loads 3, stores holding the memory unit) leaves the
+other instruction types to `generic.md`. The retail compiler's values differ for six
+of them. Method: one `cc1plus` per variant of the description, every Bullet file
+compiled with the build method below, every function searched in the original
+(relocated fields masked); a variant is kept when it adds identical functions and
+loses none. 994 functions, 443 identical with the kit's description (and `fcvt` 2,
+the first value found: `btQuantizedBvh::reportAabbOverlappingNodex`, 0x14B804, has an
+independent load between each `trunc.w.s` and its `mfc1`).
+
+| Type | `generic.md` | Retail | Evidence (identical functions) |
+|---|---|---|---|
+| `fmul`, `fmadd`, single precision | 7 | 4 | alone 443 -> 474; 3: 446 with 2 lost; 5: 447; 6, 8, 9: 443 |
+| `fabs`, `fneg`, `fmove` | 2 | 4 | alone 454; 3: 449; 5: 450 with 4 lost; 1: 441 |
+| `xfer` (`mfc1`, `mtc1`) | 2 | 3 | alone 448; 1: 437; 4 and 5: 444 with 3 lost |
+| `fcmp` | 3 | 4 | no effect alone; with the three above 507 -> 517; 2: 503; 5, 6: 508 |
+| `fcvt` | 1 | 4 | on top of the others 517 -> 520; 3: 518; 5: 517 |
+| `imul`, `imadd` | 17 | 5 | 505 -> 507 (two `btCapsuleShape` functions); 3, 4: 503; 6, 8, 12: 505 |
+
+All together: **520 identical, none of the 443 lost**. `fadd` stays at 4 (1, 2, 3, 5, 6
+all lose functions): every single-precision operation but the division and the
+square root takes 4 cycles. Other values tried around the result, all worse or
+without effect: load 2 or 4, float loads 2 or 4, any other store reservation (236 to
+485), `slt`, `shift`, `arith`, `const`, `call`, `branch` at 2, `fdiv` 4, 12, 15, 40
+(23 kept), `fsqrt` 4, 15 (54 kept); `jump`, `unknown`, `multi`, `idiv`, the
+double-precision multiplication change nothing. With it
+`btBvhTriangleMeshShape::setOptimizedBvh` (0x143EC4; before, `$s0` and `$s1`
+exchanged: the first scheduling pass decides the life lengths the local allocator
+ranks) and `btPersistentManifold::refreshContactPoints` (0x152B28, 342 instructions)
+are identical, and twelve more files have their whole `.text` identical. No probe
+function changes (12/12). Adopted in build `4.0.4a`:
+`tools/gcc/allegrex-sched-4.0.4.diff`, applied by `tools/gcc/build_404a.sh` after the
+block-copy diff. Scheduler options (`-fno-sched-*`, `-fsched2-use-*`) do not help
+the near misses that remain.
 
 ### Adopted
 
