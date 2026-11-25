@@ -53,6 +53,11 @@ CC_DIRS = COMPILER_CONFIG.get("dirs", {}) if COMPILER_CONFIG else {}
 # unaligned_words = true: lwl/lwr/swl/swr written as .word for an assembler that
 # refuses them (tools/psp/compile.py --unaligned-words)
 CC_OPTIONS = "--unaligned-words " if COMPILER_CONFIG and COMPILER_CONFIG.get("unaligned_words") else ""
+# depfile = true: a GCC-compatible compiler lists the headers of each source, so that
+# a header change compiles its users again (tools/psp/compile.py --depfile)
+CC_DEPFILE = bool(COMPILER_CONFIG and COMPILER_CONFIG.get("depfile"))
+if CC_DEPFILE:
+    CC_OPTIONS += "--depfile $out.d "
 
 AS_FLAGS = "-EL -march=mips32r2 -mabi=32 -G0 -no-pad-sections -Iinclude"
 LD_FLAGS = "-EL --no-check-sections"
@@ -227,7 +232,7 @@ def main() -> None:
            description="AS $in")
     n.variable("cc", posix(cc_command))
     n.rule("cc", f"$python {psp}/compile.py {CC_OPTIONS}${{cc_options}}{posix(tool('objcopy'))} $out $cc -c $cc_flags -o $out $in",
-           description="CC $in")
+           description="CC $in", **({"depfile": "$out.d", "deps": "gcc"} if CC_DEPFILE else {}))
     n.rule("bin", f"{tool('objcopy')} -I binary -O elf32-littlemips -B mips $in $out",
            description="BIN $in")
     n.rule("ld", f"{tool('ld')} $ld_flags -T $script $undefined -Map $map -o $out",
