@@ -1,7 +1,3 @@
-/* Altered source version, not the original Bullet file: changed for the build of
-   the game (see notes/PROVENANCE.md). walkStacklessQuantizedTreeAgainstRay sets a
-   zero component of the inverse ray direction to 1.0, not 1e30. */
-
 /*
 Bullet Continuous Collision Detection and Physics Library
 Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/

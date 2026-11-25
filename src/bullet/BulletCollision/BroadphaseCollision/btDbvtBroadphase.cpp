@@ -112,6 +112,7 @@ void	Process(const btDbvtNode* na,const btDbvtNode* nb)
 //
 btDbvtBroadphase::btDbvtBroadphase(btOverlappingPairCache* paircache)
 {
+btDbvt::benchmark();
 m_releasepaircache	=	(paircache!=0)?false:true;
 m_predictedframes	=	2;
 m_stageCurrent		=	0;

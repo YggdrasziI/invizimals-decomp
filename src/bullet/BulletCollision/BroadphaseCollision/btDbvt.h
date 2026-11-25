@@ -25,47 +25,19 @@ subject to the following restrictions:
 // Compile time configuration
 //
 
-
-// Implementation profiles
-#define DBVT_IMPL_GENERIC		0	// Generic implementation	
-#define DBVT_IMPL_SSE			1	// SSE
-
-// Template implementation of ICollide
 #ifdef WIN32
-	#if (defined (_MSC_VER) && _MSC_VER >= 1400)
-	#define	DBVT_USE_TEMPLATE		1
-	#else
-	#define	DBVT_USE_TEMPLATE		0
+//only define templates for visual studio 2005 and later, it just causes headaches for other compilers
+#if (defined (_MSC_VER) && _MSC_VER >= 1400)
+#define	DBVT_USE_TEMPLATE		1	// Enable template for ICollide
+#else
+#define	DBVT_USE_TEMPLATE		0	// Don't
 #endif
 #else
-#define	DBVT_USE_TEMPLATE		0
+#define	DBVT_USE_TEMPLATE		0	// Enable template for ICollide
 #endif
 
-// Using memmov for collideOCL
-#define DBVT_USE_MEMMOVE		1
-
-// Enable benchmarking code
-#define	DBVT_ENABLE_BENCHMARK	0
-
-// Inlining
-#define DBVT_INLINE				SIMD_FORCE_INLINE
-// Align
-#ifdef WIN32
-#define DBVT_ALIGN				__declspec(align(16))
-#else
-#define DBVT_ALIGN
-#endif
-
-// Specific methods implementation
-#ifdef WIN32
-#define DBVT_PROXIMITY_IMPL		DBVT_IMPL_SSE
-#define DBVT_SELECT_IMPL		DBVT_IMPL_SSE
-#define DBVT_MERGE_IMPL			DBVT_IMPL_SSE
-#else
-#define DBVT_PROXIMITY_IMPL		DBVT_IMPL_GENERIC
-#define DBVT_SELECT_IMPL		DBVT_IMPL_GENERIC
-#define DBVT_MERGE_IMPL			DBVT_IMPL_GENERIC
-#endif
+#define DBVT_USE_MEMMOVE		1	// Enable memmove (collideOCL)
+#define	DBVT_ENABLE_BENCHMARK	0	// Enable benchmarking code
 
 //
 // Auto config and checks
@@ -104,18 +76,6 @@ subject to the following restrictions:
 #error "DBVT_ENABLE_BENCHMARK undefined"
 #endif
 
-#ifndef DBVT_PROXIMITY_IMPL
-#error "DBVT_PROXIMITY_IMPL undefined"
-#endif
-
-#ifndef DBVT_SELECT_IMPL
-#error "DBVT_SELECT_IMPL undefined"
-#endif
-
-#ifndef DBVT_MERGE_IMPL
-#error "DBVT_MERGE_IMPL undefined"
-#endif
-
 //
 // Defaults volumes
 //
@@ -123,44 +83,41 @@ subject to the following restrictions:
 /* btDbvtAabbMm			*/ 
 struct	btDbvtAabbMm
 {
-DBVT_INLINE btVector3			Center() const	{ return((mi+mx)/2); }
-DBVT_INLINE btVector3			Lengths() const	{ return(mx-mi); }
-DBVT_INLINE btVector3			Extents() const	{ return((mx-mi)/2); }
-DBVT_INLINE const btVector3&	Mins() const	{ return(mi); }
-DBVT_INLINE const btVector3&	Maxs() const	{ return(mx); }
-static inline btDbvtAabbMm		FromCE(const btVector3& c,const btVector3& e);
-static inline btDbvtAabbMm		FromCR(const btVector3& c,btScalar r);
-static inline btDbvtAabbMm		FromMM(const btVector3& mi,const btVector3& mx);
-static inline btDbvtAabbMm		FromPoints(const btVector3* pts,int n);
-static inline btDbvtAabbMm		FromPoints(const btVector3** ppts,int n);
-DBVT_INLINE void				Expand(const btVector3 e);
-DBVT_INLINE void				SignedExpand(const btVector3 e);
-DBVT_INLINE bool				Contain(const btDbvtAabbMm& a) const;
-DBVT_INLINE int					Classify(const btVector3& n,btScalar o,int s) const;
-DBVT_INLINE btScalar			ProjectMinimum(const btVector3& v,unsigned signs) const;
-DBVT_INLINE friend bool			Intersect(	const btDbvtAabbMm& a,
-											const btDbvtAabbMm& b);
-DBVT_INLINE friend bool			Intersect(	const btDbvtAabbMm& a,
-											const btDbvtAabbMm& b,
-											const btTransform& xform);
-DBVT_INLINE friend bool			Intersect(	const btDbvtAabbMm& a,
-											const btVector3& b);
-DBVT_INLINE friend bool			Intersect(	const btDbvtAabbMm& a,
-											const btVector3& org,
-											const btVector3& invdir,
-											const unsigned* signs);
-DBVT_INLINE friend btScalar		Proximity(	const btDbvtAabbMm& a,
-											const btDbvtAabbMm& b);
-DBVT_INLINE friend int			Select(		const btDbvtAabbMm& o,
-											const btDbvtAabbMm& a,
-											const btDbvtAabbMm& b);
-DBVT_INLINE friend void			Merge(		const btDbvtAabbMm& a,
-											const btDbvtAabbMm& b,
-											btDbvtAabbMm& r);
-DBVT_INLINE friend bool			NotEqual(	const btDbvtAabbMm& a,
-											const btDbvtAabbMm& b);
+inline btVector3			Center() const	{ return((mi+mx)/2); }
+inline btVector3			Lengths() const	{ return(mx-mi); }
+inline btVector3			Extents() const	{ return((mx-mi)/2); }
+inline const btVector3&		Mins() const	{ return(mi); }
+inline const btVector3&		Maxs() const	{ return(mx); }
+static inline btDbvtAabbMm	FromCE(const btVector3& c,const btVector3& e);
+static inline btDbvtAabbMm	FromCR(const btVector3& c,btScalar r);
+static inline btDbvtAabbMm	FromMM(const btVector3& mi,const btVector3& mx);
+static inline btDbvtAabbMm	FromPoints(const btVector3* pts,int n);
+static inline btDbvtAabbMm	FromPoints(const btVector3** ppts,int n);
+inline void					Expand(const btVector3 e);
+inline void					SignedExpand(const btVector3 e);
+inline bool					Contain(const btDbvtAabbMm& a) const;
+inline int					Classify(const btVector3& n,btScalar o,int s) const;
+inline btScalar				ProjectMinimum(const btVector3& v,unsigned signs) const;
+inline friend bool			Intersect(	const btDbvtAabbMm& a,
+										const btDbvtAabbMm& b);
+inline friend bool			Intersect(	const btDbvtAabbMm& a,
+										const btDbvtAabbMm& b,
+										const btTransform& xform);
+inline friend bool			Intersect(	const btDbvtAabbMm& a,
+										const btVector3& b);
+inline friend bool			Intersect(	const btDbvtAabbMm& a,
+										const btVector3& org,
+										const btVector3& invdir,
+										const unsigned* signs);
+inline friend btScalar		Proximity(	const btDbvtAabbMm& a,
+										const btDbvtAabbMm& b);
+inline friend void			Merge(	const btDbvtAabbMm& a,
+									const btDbvtAabbMm& b,
+									btDbvtAabbMm& r);
+inline friend bool			NotEqual(	const btDbvtAabbMm& a,
+										const btDbvtAabbMm& b);
 private:
-DBVT_INLINE void				AddSpan(const btVector3& d,btScalar& smi,btScalar& smx) const;
+inline void					AddSpan(const btVector3& d,btScalar& smi,btScalar& smx) const;
 private:
 btVector3	mi,mx;
 };
@@ -172,7 +129,7 @@ typedef	btDbvtAabbMm	btDbvtVolume;
 struct	btDbvtNode
 {
 	btDbvtVolume	volume;
-	btDbvtNode*		parent;
+	btDbvtNode*	parent;
 	bool	isleaf() const		{ return(childs[1]==0); }
 	bool	isinternal() const	{ return(!isleaf()); }
 	union	{
@@ -193,7 +150,6 @@ struct	btDbvt
 		{
 		const btDbvtNode*	a;
 		const btDbvtNode*	b;
-		sStkNN() {}
 		sStkNN(const btDbvtNode* na,const btDbvtNode* nb) : a(na),b(nb) {}
 		};
 	struct	sStkNP
@@ -263,7 +219,7 @@ struct	btDbvt
 	void			optimizeBottomUp();
 	void			optimizeTopDown(int bu_treshold=128);
 	void			optimizeIncremental(int passes);
-	btDbvtNode*		insert(const btDbvtVolume& box,void* data);
+	btDbvtNode*			insert(const btDbvtVolume& box,void* data);
 	void			update(btDbvtNode* leaf,int lookahead=-1);
 	void			update(btDbvtNode* leaf,const btDbvtVolume& volume);
 	bool			update(btDbvtNode* leaf,btDbvtVolume volume,const btVector3& velocity,btScalar margin);
@@ -271,8 +227,7 @@ struct	btDbvt
 	bool			update(btDbvtNode* leaf,btDbvtVolume volume,btScalar margin);	
 	void			remove(btDbvtNode* leaf);
 	void			write(IWriter* iwriter) const;
-	void			clone(btDbvt& dest,IClone* iclone=0) const;
-	static int		maxdepth(const btDbvtNode* node);
+	void			clone(btDbvt& dest,IClone* iclone=0) const;	
 	static int		countLeaves(const btDbvtNode* node);
 	static void		extractLeaves(const btDbvtNode* node,btAlignedObjectArray<const btDbvtNode*>& leaves);
 	#if DBVT_ENABLE_BENCHMARK
@@ -329,7 +284,7 @@ struct	btDbvt
 	static void		collideTU(	const btDbvtNode* root,
 								DBVT_IPOLICY);
 	// Helpers	
-	static DBVT_INLINE int	nearest(const int* i,const btDbvt::sStkNPS* a,btScalar v,int l,int h)
+	static inline int		nearest(const int* i,const btDbvt::sStkNPS* a,btScalar v,int l,int h)
 		{
 		int	m=0;
 		while(l<h)
@@ -339,7 +294,7 @@ struct	btDbvt
 			}
 		return(h);
 		}
-	static DBVT_INLINE int	allocate(	btAlignedObjectArray<int>& ifree,
+	static inline int		allocate(	btAlignedObjectArray<int>& ifree,
 										btAlignedObjectArray<sStkNPS>& stock,
 										const sStkNPS& value)
 		{
@@ -360,7 +315,7 @@ struct	btDbvt
 //
 
 //
-inline btDbvtAabbMm			btDbvtAabbMm::FromCE(const btVector3& c,const btVector3& e)
+inline btDbvtAabbMm		btDbvtAabbMm::FromCE(const btVector3& c,const btVector3& e)
 {
 btDbvtAabbMm box;
 box.mi=c-e;box.mx=c+e;
@@ -368,13 +323,13 @@ return(box);
 }
 	
 //
-inline btDbvtAabbMm			btDbvtAabbMm::FromCR(const btVector3& c,btScalar r)
+inline btDbvtAabbMm		btDbvtAabbMm::FromCR(const btVector3& c,btScalar r)
 {
 return(FromCE(c,btVector3(r,r,r)));
 }
 	
 //
-inline btDbvtAabbMm			btDbvtAabbMm::FromMM(const btVector3& mi,const btVector3& mx)
+inline btDbvtAabbMm		btDbvtAabbMm::FromMM(const btVector3& mi,const btVector3& mx)
 {
 btDbvtAabbMm box;
 box.mi=mi;box.mx=mx;
@@ -382,7 +337,7 @@ return(box);
 }
 	
 //
-inline btDbvtAabbMm			btDbvtAabbMm::FromPoints(const btVector3* pts,int n)
+inline btDbvtAabbMm		btDbvtAabbMm::FromPoints(const btVector3* pts,int n)
 {
 btDbvtAabbMm box;
 box.mi=box.mx=pts[0];
@@ -395,7 +350,7 @@ return(box);
 }
 
 //
-inline btDbvtAabbMm			btDbvtAabbMm::FromPoints(const btVector3** ppts,int n)
+inline btDbvtAabbMm		btDbvtAabbMm::FromPoints(const btVector3** ppts,int n)
 {
 btDbvtAabbMm box;
 box.mi=box.mx=*ppts[0];
@@ -408,13 +363,13 @@ return(box);
 }
 
 //
-DBVT_INLINE void		btDbvtAabbMm::Expand(const btVector3 e)
+inline void				btDbvtAabbMm::Expand(const btVector3 e)
 {
 mi-=e;mx+=e;
 }
 	
 //
-DBVT_INLINE void		btDbvtAabbMm::SignedExpand(const btVector3 e)
+inline void				btDbvtAabbMm::SignedExpand(const btVector3 e)
 {
 if(e.x()>0) mx.setX(mx.x()+e.x()); else mi.setX(mi.x()+e.x());
 if(e.y()>0) mx.setY(mx.y()+e.y()); else mi.setY(mi.y()+e.y());
@@ -422,7 +377,7 @@ if(e.z()>0) mx.setZ(mx.z()+e.z()); else mi.setZ(mi.z()+e.z());
 }
 	
 //
-DBVT_INLINE bool		btDbvtAabbMm::Contain(const btDbvtAabbMm& a) const
+inline bool				btDbvtAabbMm::Contain(const btDbvtAabbMm& a) const
 {
 return(	(mi.x()<=a.mi.x())&&
 		(mi.y()<=a.mi.y())&&
@@ -433,7 +388,7 @@ return(	(mi.x()<=a.mi.x())&&
 }
 
 //
-DBVT_INLINE int		btDbvtAabbMm::Classify(const btVector3& n,btScalar o,int s) const
+inline int				btDbvtAabbMm::Classify(const btVector3& n,btScalar o,int s) const
 {
 btVector3			pi,px;
 switch(s)
@@ -461,7 +416,7 @@ return(0);
 }
 
 //
-DBVT_INLINE btScalar	btDbvtAabbMm::ProjectMinimum(const btVector3& v,unsigned signs) const
+inline btScalar			btDbvtAabbMm::ProjectMinimum(const btVector3& v,unsigned signs) const
 {
 const btVector3*	b[]={&mx,&mi};
 const btVector3		p(	b[(signs>>0)&1]->x(),
@@ -471,7 +426,7 @@ return(dot(p,v));
 }
 
 //
-DBVT_INLINE void		btDbvtAabbMm::AddSpan(const btVector3& d,btScalar& smi,btScalar& smx) const
+inline void				btDbvtAabbMm::AddSpan(const btVector3& d,btScalar& smi,btScalar& smx) const
 {
 for(int i=0;i<3;++i)
 	{
@@ -483,7 +438,7 @@ for(int i=0;i<3;++i)
 }
 	
 //
-DBVT_INLINE bool		Intersect(	const btDbvtAabbMm& a,
+inline bool				Intersect(	const btDbvtAabbMm& a,
 									const btDbvtAabbMm& b)
 {
 return(	(a.mi.x()<=b.mx.x())&&
@@ -495,7 +450,7 @@ return(	(a.mi.x()<=b.mx.x())&&
 }
 
 //
-DBVT_INLINE bool		Intersect(	const btDbvtAabbMm& a,
+inline bool				Intersect(	const btDbvtAabbMm& a,
 									const btDbvtAabbMm& b,
 									const btTransform& xform)
 {
@@ -511,7 +466,7 @@ return(true);
 }
 
 //
-DBVT_INLINE bool		Intersect(	const btDbvtAabbMm& a,
+inline bool				Intersect(	const btDbvtAabbMm& a,
 									const btVector3& b)
 {
 return(	(b.x()>=a.mi.x())&&
@@ -523,20 +478,11 @@ return(	(b.x()>=a.mi.x())&&
 }
 
 //
-DBVT_INLINE bool		Intersect(	const btDbvtAabbMm& a,
+inline bool				Intersect(	const btDbvtAabbMm& a,
 									const btVector3& org,
 									const btVector3& invdir,
 									const unsigned* signs)
 {
-#if 0
-const btVector3		b0((a.mi-org)*invdir);
-const btVector3		b1((a.mx-org)*invdir);
-const btVector3		tmin(btMin(b0[0],b1[0]),btMin(b0[1],b1[1]),btMin(b0[2],b1[2]));
-const btVector3		tmax(btMax(b0[0],b1[0]),btMax(b0[1],b1[1]),btMax(b0[2],b1[2]));
-const btScalar		tin=btMax(tmin[0],btMax(tmin[1],tmin[2]));
-const btScalar		tout=btMin(tmax[0],btMin(tmax[1],tmax[2]));
-return(tin<tout);
-#else
 const btVector3*	bounds[2]={&a.mi,&a.mx};
 btScalar			txmin=(bounds[  signs[0]]->x()-org[0])*invdir[0];
 btScalar			txmax=(bounds[1-signs[0]]->x()-org[0])*invdir[0];
@@ -551,113 +497,30 @@ if((txmin>tzmax)||(tzmin>txmax)) return(false);
 if(tzmin>txmin) txmin=tzmin;
 if(tzmax<txmax) txmax=tzmax;
 return(txmax>0);
-#endif
 }
 	
 //
-DBVT_INLINE btScalar	Proximity(	const btDbvtAabbMm& a,
+inline btScalar			Proximity(	const btDbvtAabbMm& a,
 									const btDbvtAabbMm& b)
 {
-#if	DBVT_PROXIMITY_IMPL == DBVT_IMPL_SSE
-DBVT_ALIGN btScalar							r[1];
-static DBVT_ALIGN const unsigned __int32	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x7fffffff};
-__asm
-	{
-	mov		eax,a
-	mov		ecx,b
-	movaps	xmm0,[eax]
-	movaps	xmm2,[ecx]
-	movaps	xmm1,[eax+16]
-	movaps	xmm3,[ecx+16]
-	addps	xmm0,xmm1
-	addps	xmm2,xmm3
-	subps	xmm0,xmm2
-	andps	xmm0,mask
-	movhlps	xmm1,xmm0
-	addps	xmm0,xmm1
-	pshufd	xmm1,xmm0,1
-	addss	xmm0,xmm1
-	movss	r,xmm0
-	}
-return(r[0]);
-#else
 const btVector3	d=(a.mi+a.mx)-(b.mi+b.mx);
 return(btFabs(d.x())+btFabs(d.y())+btFabs(d.z()));
-#endif
 }
 
 //
-DBVT_INLINE int			Select(	const btDbvtAabbMm& o,
-								const btDbvtAabbMm& a,
-								const btDbvtAabbMm& b)
-{
-#if	DBVT_SELECT_IMPL == DBVT_IMPL_SSE
-DBVT_ALIGN __int32							r[1];
-static DBVT_ALIGN const unsigned __int32	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x7fffffff};
-__asm
-	{
-	mov		eax,o
-	mov		ecx,a
-	mov		edx,b
-	movaps	xmm0,[eax]
-	movaps	xmm5,mask
-	addps	xmm0,[eax+16]	
-	movaps	xmm1,[ecx]
-	movaps	xmm2,[edx]
-	addps	xmm1,[ecx+16]
-	addps	xmm2,[edx+16]
-	subps	xmm1,xmm0
-	subps	xmm2,xmm0
-	andps	xmm1,xmm5
-	andps	xmm2,xmm5
-	movhlps	xmm3,xmm1
-	movhlps	xmm4,xmm2
-	addps	xmm1,xmm3
-	addps	xmm2,xmm4
-	pshufd	xmm3,xmm1,1
-	pshufd	xmm4,xmm2,1
-	addss	xmm1,xmm3
-	addss	xmm2,xmm4
-	cmpless	xmm2,xmm1
-	movss	r,xmm2
-	}
-return(r[0]&1);
-#else
-return(Proximity(o,a)<Proximity(o,b)?0:1);
-#endif
-}
-
-//
-DBVT_INLINE void		Merge(	const btDbvtAabbMm& a,
+inline void				Merge(	const btDbvtAabbMm& a,
 								const btDbvtAabbMm& b,
 								btDbvtAabbMm& r)
 {
-#if DBVT_MERGE_IMPL==DBVT_IMPL_SSE
-__asm
-	{
-	mov		eax,a
-	mov		edx,b
-	mov		ecx,r
-	movaps	xmm0,[eax+0]
-	movaps	xmm1,[edx+0]
-	movaps	xmm2,[eax+16]
-	movaps	xmm3,[edx+16]
-	minps	xmm0,xmm1
-	maxps	xmm2,xmm3
-	movaps	[ecx+0],xmm0
-	movaps	[ecx+16],xmm2
-	}
-#else
 for(int i=0;i<3;++i)
 	{
 	if(a.mi[i]<b.mi[i]) r.mi[i]=a.mi[i]; else r.mi[i]=b.mi[i];
 	if(a.mx[i]>b.mx[i]) r.mx[i]=a.mx[i]; else r.mx[i]=b.mx[i];
 	}
-#endif
 }
 
 //
-DBVT_INLINE bool		NotEqual(	const btDbvtAabbMm& a,
+inline bool				NotEqual(	const btDbvtAabbMm& a,
 									const btDbvtAabbMm& b)
 {
 return(	(a.mi.x()!=b.mi.x())||
@@ -713,24 +576,18 @@ DBVT_CHECKTYPE
 if(root0&&root1)
 	{
 	btAlignedObjectArray<sStkNN>	stack;
-	int								depth=1;
-	int								treshold=DOUBLE_STACKSIZE-4;
-	stack.resize(DOUBLE_STACKSIZE);
-	stack[0]=sStkNN(root0,root1);
+	stack.reserve(DOUBLE_STACKSIZE);
+	stack.push_back(sStkNN(root0,root1));
 	do	{
-		sStkNN	p=stack[--depth];
-		if(depth>treshold)
-			{
-			stack.resize(stack.size()*2);
-			treshold=stack.size()-4;
-			}
+		sStkNN	p=stack[stack.size()-1];
+		stack.pop_back();
 		if(p.a==p.b)
 			{
 			if(p.a->isinternal())
 				{
-				stack[depth++]=sStkNN(p.a->childs[0],p.a->childs[0]);
-				stack[depth++]=sStkNN(p.a->childs[1],p.a->childs[1]);
-				stack[depth++]=sStkNN(p.a->childs[0],p.a->childs[1]);
+				stack.push_back(sStkNN(p.a->childs[0],p.a->childs[0]));
+				stack.push_back(sStkNN(p.a->childs[1],p.a->childs[1]));
+				stack.push_back(sStkNN(p.a->childs[0],p.a->childs[1]));
 				}
 			}
 		else if(Intersect(p.a->volume,p.b->volume))
@@ -739,23 +596,23 @@ if(root0&&root1)
 				{
 				if(p.b->isinternal())
 					{
-					stack[depth++]=sStkNN(p.a->childs[0],p.b->childs[0]);
-					stack[depth++]=sStkNN(p.a->childs[1],p.b->childs[0]);
-					stack[depth++]=sStkNN(p.a->childs[0],p.b->childs[1]);
-					stack[depth++]=sStkNN(p.a->childs[1],p.b->childs[1]);
+					stack.push_back(sStkNN(p.a->childs[0],p.b->childs[0]));
+					stack.push_back(sStkNN(p.a->childs[1],p.b->childs[0]));
+					stack.push_back(sStkNN(p.a->childs[0],p.b->childs[1]));
+					stack.push_back(sStkNN(p.a->childs[1],p.b->childs[1]));
 					}
 					else
 					{
-					stack[depth++]=sStkNN(p.a->childs[0],p.b);
-					stack[depth++]=sStkNN(p.a->childs[1],p.b);
+					stack.push_back(sStkNN(p.a->childs[0],p.b));
+					stack.push_back(sStkNN(p.a->childs[1],p.b));
 					}
 				}
 				else
 				{
 				if(p.b->isinternal())
 					{
-					stack[depth++]=sStkNN(p.a,p.b->childs[0]);
-					stack[depth++]=sStkNN(p.a,p.b->childs[1]);
+					stack.push_back(sStkNN(p.a,p.b->childs[0]));
+					stack.push_back(sStkNN(p.a,p.b->childs[1]));
 					}
 					else
 					{
@@ -763,7 +620,7 @@ if(root0&&root1)
 					}
 				}
 			}
-		} while(depth);
+		} while(stack.size()>0);
 	}
 }
 
@@ -778,40 +635,34 @@ DBVT_CHECKTYPE
 if(root0&&root1)
 	{
 	btAlignedObjectArray<sStkNN>	stack;
-	int								depth=1;
-	int								treshold=DOUBLE_STACKSIZE-4;
-	stack.resize(DOUBLE_STACKSIZE);
-	stack[0]=sStkNN(root0,root1);
+	stack.reserve(DOUBLE_STACKSIZE);
+	stack.push_back(sStkNN(root0,root1));
 	do	{
-		sStkNN	p=stack[--depth];
+		sStkNN	p=stack[stack.size()-1];
+		stack.pop_back();
 		if(Intersect(p.a->volume,p.b->volume,xform))
 			{
-			if(depth>treshold)
-				{
-				stack.resize(stack.size()*2);
-				treshold=stack.size()-4;
-				}
 			if(p.a->isinternal())
 				{
 				if(p.b->isinternal())
-					{					
-					stack[depth++]=sStkNN(p.a->childs[0],p.b->childs[0]);
-					stack[depth++]=sStkNN(p.a->childs[1],p.b->childs[0]);
-					stack[depth++]=sStkNN(p.a->childs[0],p.b->childs[1]);
-					stack[depth++]=sStkNN(p.a->childs[1],p.b->childs[1]);
+					{
+					stack.push_back(sStkNN(p.a->childs[0],p.b->childs[0]));
+					stack.push_back(sStkNN(p.a->childs[1],p.b->childs[0]));
+					stack.push_back(sStkNN(p.a->childs[0],p.b->childs[1]));
+					stack.push_back(sStkNN(p.a->childs[1],p.b->childs[1]));
 					}
 					else
 					{
-					stack[depth++]=sStkNN(p.a->childs[0],p.b);
-					stack[depth++]=sStkNN(p.a->childs[1],p.b);
+					stack.push_back(sStkNN(p.a->childs[0],p.b));
+					stack.push_back(sStkNN(p.a->childs[1],p.b));
 					}
 				}
 				else
 				{
 				if(p.b->isinternal())
 					{
-					stack[depth++]=sStkNN(p.a,p.b->childs[0]);
-					stack[depth++]=sStkNN(p.a,p.b->childs[1]);
+					stack.push_back(sStkNN(p.a,p.b->childs[0]));
+					stack.push_back(sStkNN(p.a,p.b->childs[1]));
 					}
 					else
 					{
@@ -819,7 +670,7 @@ if(root0&&root1)
 					}
 				}
 			}
-		} while(depth);
+		} while(stack.size()>0);
 	}
 }
 
@@ -1094,8 +945,5 @@ if(root)
 #undef DBVT_PREFIX
 #undef DBVT_IPOLICY
 #undef DBVT_CHECKTYPE
-#undef DBVT_IMPL_GENERIC
-#undef DBVT_IMPL_FPU0x86
-#undef DBVT_IMPL_SSE
 
 #endif

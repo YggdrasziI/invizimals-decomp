@@ -150,9 +150,6 @@ public:
 	///apply gravity, call this once per timestep
 	virtual void	applyGravity();
 
-	virtual void	setNumTasks(int numTasks)
-	{
-	}
 
 };
 

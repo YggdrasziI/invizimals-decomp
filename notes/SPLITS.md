@@ -72,7 +72,7 @@ The upstream sources compiled with the stock PSPDEV GCC 4.0.2 at `-O2 -G0`, with
 
 ### Bullet files
 
-Trunk 110e8313dab1 (between 2.70 and 2.71) with the game's changes (`notes/PROVENANCE.md`),
+Trunk 115018330038 (between 2.70 and 2.71) with the game's changes (`notes/PROVENANCE.md`),
 built as `notes/COMPILER.md` ("Bullet: how its files were built") describes, found by
 content in the original. A whole C++ file is linked with its pieces at their places:
 `.text`; its floats (`.rodata.cst4`) and strings (`.rodata.str1.4`, 0x237xxx); its
@@ -93,7 +93,7 @@ Bullet commit `79b6f7a77219` (2008-08-26, which moved most of it into
 `BroadphaseCollision/btQuantizedBvh.cpp`): the typeinfo name `14btQuantizedBvh` is
 absent, `btOptimizedBvh`'s typeinfo (0x2426B8) has no base class, its vtable (0x2426DC)
 points into this range (D1 0x148830, D0 0x1484A4), and the file of commit
-`8eafab367fc2` (the same as `110e8313dab1`'s, with the two game changes) gives every
+`115018330038` (with the game's `btQuantizedBvhNode` change) gives every
 function at the game's offset from 0x147468 up to `updateBvhNodes` (0x14C96C), the
 only one not identical (93.6 %: the last loop, one induction variable in the game,
 two in ours; 8 bytes shorter). `src/bullet` is therefore that tree

@@ -39,7 +39,7 @@ depfile = true
 linux = "~/lbp-gcc4/psp-gcc-4.0.2h/bin/psp-gcc"
 flags = "-O2 -G0 -DHAVE_EXPAT_CONFIG_H -nostdinc -Iinclude/libc -Iinclude/expat"
 
-# Bullet (src/bullet, trunk 110e8313dab1 with the marked changes): the game's
+# Bullet (src/bullet, trunk 115018330038 with the marked changes): the game's
 # compiler at -O3, NDEBUG, run from the Bullet root with -I. as its `__FILE__` strings
 # show (`./LinearMath/btAlignedAllocator.h`); its link merged no constants or strings,
 # so their sections lose the merge flag (notes/COMPILER.md)

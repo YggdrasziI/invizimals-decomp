@@ -43,24 +43,30 @@ the GitHub tag `R_2_0_0` of libexpat), **unmodified**. License: MIT (`src/expat/
 Written for this project: `include/expat/expat_config.h` (the build configuration,
 in place of the configure script's output) and `include/libc/` (minimal declarations).
 
-## Bullet Physics, trunk 110e8313dab1 (`src/bullet`)
+## Bullet Physics, trunk 115018330038 (`src/bullet`)
 
 The game links Bullet Physics from its trunk between the 2.70 and 2.71 releases
-(`notes/SPLITS.md`, `notes/COMPILER.md`). Function by function, commit `66861ad3340a`
-("bump up version to 2.71", 2008-08-29) and the ones before it back to the split of
-`btOptimizedBvh` give the same identical functions, and the next commits lose some.
-The game's `btOptimizedBvh.cpp` is the one from before that split (commit
-`79b6f7a77219`, 2008-08-26, which moved most of it into a new `btQuantizedBvh.cpp`;
-evidence in `notes/SPLITS.md`), so `src/bullet` is the last commit before it,
-`110e8313dab1` of [bulletphysics/bullet3](https://github.com/bulletphysics/bullet3)
-(2008-08-26; it only changed the Doxyfile). The commits from there to `66861ad3340a`
-change code the game does not have, comments, a default argument and the version
-number. `src/bullet` holds the `*.cpp` and `*.h` of `src/LinearMath`,
+(`notes/SPLITS.md`, `notes/COMPILER.md`), from between two commits:
+
+- after `4894f24c9a2b` (2008-08-01, "Fixes for FPU exceptions"): the game's
+  `btOptimizedBvh::walkStacklessQuantizedTreeAgainstRay` (0x14AED0) tests each
+  component of the ray direction against zero before inverting it, as that commit
+  added;
+- before `7838a5c98088` (2008-08-07), which added the virtual
+  `btDiscreteDynamicsWorld::setNumTasks`: the game's vtable of that class (0x243048)
+  has 27 functions and ends before it. The next commit, `551f0fa1ec68` (raw pointers
+  kept by `btAxisSweep3` and `btSimpleBroadphase`), loses 16 identical functions.
+
+The commits in between change only build files and demos, so the library sources are
+those of `115018330038` (2008-08-02), the last commit before `7838a5c98088`, of
+[bulletphysics/bullet3](https://github.com/bulletphysics/bullet3). Function by
+function it gives 16 identical functions more than the trees from `551f0fa1ec68`
+to the 2.71 commit `66861ad3340a`, and loses none the game has. `src/bullet` holds the `*.cpp` and `*.h` of `src/LinearMath`,
 `src/BulletCollision` and `src/BulletDynamics`, the three headers of `src/`
 (`btBulletCollisionCommon.h`, `btBulletDynamicsCommon.h`, `Bullet-C-Api.h`) and
 `BulletLicense.txt` of the GitHub archive of that commit
-(`codeload.github.com/bulletphysics/bullet3/tar.gz/110e8313dab1`, SHA-256
-`7a75bda5ffc47d6c9721c7070a1755b288588db81f7eaaca40c53289643bb088`). License: zlib
+(`codeload.github.com/bulletphysics/bullet3/tar.gz/115018330038`, SHA-256
+`686584be797d19c3e2d8595eadb7ebfc399b7bd6ddc18e4da6d5501d76f7a23b`). License: zlib
 (`src/bullet/BulletLicense.txt`); line endings normalized to LF. Files changed for the
 game's build are marked as such at their top (zlib license, clause 2) and listed here;
 each change is a reconstruction from the game's code, not a copy of other code:
@@ -82,13 +88,6 @@ each change is a reconstruction from the game's code, not a copy of other code:
   `btOptimizedBvh::build` (0x14E194) keeps a temporary of that type at `sp+0x14`,
   which a 16-byte aligned type cannot have; with the change the function is
   identical and no other function of the library changes.
-- `BulletCollision/CollisionShapes/btOptimizedBvh.cpp`:
-  `walkStacklessQuantizedTreeAgainstRay` sets a zero component of the inverse ray
-  direction to 1.0 instead of 1e30, as the upstream comment above those lines says:
-  the game's function (0x14AED0) tests each component against zero and stores the
-  constant 1.0 it also divides with (0x215CB8); no 1e30 there. With the change the
-  function has the game's size (589 instructions) and goes from 5 % to 91 % (the
-  rest: order and registers in the ray-box test); no other function changes.
 
 Written for this project: `include/cxx/` (minimal C and C++ declarations for Bullet;
 `new` declares `std::exception`, `std::bad_alloc` and the global allocation functions
