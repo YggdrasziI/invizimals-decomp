@@ -1,0 +1,90 @@
+SPDX-License-Identifier: GPL-3.0-or-later
+Multiply-accumulate of the game's retail compiler (notes/COMPILER.md, "madd"), for
+the build psp-gcc-4.0.4a: the LBP-PSP-Decomp kit's psp-gcc-4.0.4c work tree plus this
+diff and the other diffs of tools/gcc (tools/gcc/build_404a.sh).
+Applies with `patch -p1` in gcc-4.0.4/ after them.
+The game has 135 madd / msub, the kit's compiler none: ISA_HAS_MADD_MSUB leaves the
+Allegrex out, so the *mul_acc_si / *mul_sub_si patterns are off and only the kit's
+allegrex_madd (accumulator tied to the result) is left, which combine never forms.
+In config/mips/mips.h the Allegrex joins ISA_HAS_MADD_MSUB. In config/mips/mips.md the
+two patterns lose their third alternative (accumulator and result in general
+registers, split into a three-operand mul the Allegrex lacks): the accumulator then
+goes through LO, `mtlo` / `madd` / `mflo`, the game's sequence. Bullet sweep 1166 ->
+1168 of 1695 (with the inline functions), none lost.
+GCC code is GPL-2.0-or-later (GCC 4.0.4) and the kit's context GPL-3.0-or-later.
+--- a/gcc/config/mips/mips.h
++++ b/gcc/config/mips/mips.h
+@@ -904,6 +904,7 @@
+ #define ISA_HAS_MADD_MSUB       ((ISA_MIPS32				\
+ 				  || ISA_MIPS32R2			\
+ 				  || ISA_MIPS64				\
++				  || TARGET_ALLEGREX			\
+ 				  ) && !TARGET_MIPS16)
+ 
+ /* ISA has floating-point nmadd and nmsub instructions.  */
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -1074,13 +1074,13 @@
+ ;; LO even when that's more costly.  For now, using "*d" mostly does the
+ ;; trick.
+ (define_insn "*mul_acc_si"
+-  [(set (match_operand:SI 0 "register_operand" "=l,*d,*d")
+-	(plus:SI (mult:SI (match_operand:SI 1 "register_operand" "d,d,d")
+-			  (match_operand:SI 2 "register_operand" "d,d,d"))
+-		 (match_operand:SI 3 "register_operand" "0,l,*d")))
+-   (clobber (match_scratch:SI 4 "=h,h,h"))
+-   (clobber (match_scratch:SI 5 "=X,3,l"))
+-   (clobber (match_scratch:SI 6 "=X,X,&d"))]
++  [(set (match_operand:SI 0 "register_operand" "=l,*d")
++	(plus:SI (mult:SI (match_operand:SI 1 "register_operand" "d,d")
++			  (match_operand:SI 2 "register_operand" "d,d"))
++		 (match_operand:SI 3 "register_operand" "0,l")))
++   (clobber (match_scratch:SI 4 "=h,h"))
++   (clobber (match_scratch:SI 5 "=X,3"))
++   (clobber (match_scratch:SI 6 "=X,X"))]
+   "(TARGET_MIPS3900
+    || ISA_HAS_MADD_MSUB)
+    && !TARGET_MIPS16"
+@@ -1092,9 +1092,9 @@
+     return "#";
+   return madd[which_alternative];
+ }
+-  [(set_attr "type"	"imadd,imadd,multi")
++  [(set_attr "type"	"imadd,imadd")
+    (set_attr "mode"	"SI")
+-   (set_attr "length"	"4,4,8")])
++   (set_attr "length"	"4,4")])
+ 
+ ;; Split the above insn if we failed to get LO allocated.
+ (define_split
+@@ -1335,21 +1335,20 @@
+ })
+ 
+ (define_insn "*mul_sub_si"
+-  [(set (match_operand:SI 0 "register_operand" "=l,*d,*d")
+-        (minus:SI (match_operand:SI 1 "register_operand" "0,l,*d")
+-                  (mult:SI (match_operand:SI 2 "register_operand" "d,d,d")
+-                           (match_operand:SI 3 "register_operand" "d,d,d"))))
+-   (clobber (match_scratch:SI 4 "=h,h,h"))
+-   (clobber (match_scratch:SI 5 "=X,1,l"))
+-   (clobber (match_scratch:SI 6 "=X,X,&d"))]
++  [(set (match_operand:SI 0 "register_operand" "=l,*d")
++        (minus:SI (match_operand:SI 1 "register_operand" "0,l")
++                  (mult:SI (match_operand:SI 2 "register_operand" "d,d")
++                           (match_operand:SI 3 "register_operand" "d,d"))))
++   (clobber (match_scratch:SI 4 "=h,h"))
++   (clobber (match_scratch:SI 5 "=X,1"))
++   (clobber (match_scratch:SI 6 "=X,X"))]
+   "ISA_HAS_MADD_MSUB"
+   "@
+    msub\t%2,%3
+-   #
+    #"
+-  [(set_attr "type"     "imadd,multi,multi")
++  [(set_attr "type"     "imadd,multi")
+    (set_attr "mode"     "SI")
+-   (set_attr "length"   "4,8,8")])
++   (set_attr "length"   "4,8")])
+ 
+ ;; Split the above insn if we failed to get LO allocated.
+ (define_split

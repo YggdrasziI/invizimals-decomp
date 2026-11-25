@@ -206,6 +206,28 @@ switch to insertion sort when no swap happened gives the same). Adopted in build
 `4.0.4a`: `tools/gcc/host-qsort-4.0.4.diff` (appended to `config/mips/mips.c`).
 Every other `qsort` call of GCC gets it too.
 
+**madd** (2026-11-25). The game has 135 `madd` / `msub` (98 in the game code below
+0x133CCC, 28 in Bullet, 22 elsewhere); the kit's compiler emits
+none. `ISA_HAS_MADD_MSUB` (`config/mips/mips.h`) leaves the Allegrex out, so the
+`*mul_acc_si` / `*mul_sub_si` patterns of `mips.md` are off; the kit's own
+`allegrex_madd` ties the accumulator to the result and combine never forms it.
+Evidence: `btStridingMeshInterface::InternalProcessAllTriangles` (0x14FD44) computes
+`base + index * stride` as `mtlo base` / `madd index, stride` / `mflo`, where the kit
+gives `mult` / `mflo` / `addu`. With the Allegrex in `ISA_HAS_MADD_MSUB` alone, combine
+forms `*mul_acc_si` but reload takes its third alternative (accumulator and result in
+general registers, no reload needed), whose splitter wants a three-operand `mul` the
+Allegrex lacks (internal compiler error); with that splitter replaced by `mult` /
+`mflo` / `addu`, no `madd` at all and no change on Bullet. Without the third
+alternative (in `*mul_sub_si` too), the accumulator goes through LO and the game's
+sequence comes out: Bullet sweep 1166 -> 1168 of 1695 (with the inline functions),
+none lost (`btRandInt2`, the `processNode` of `btBvhTriangleMeshShape::
+processAllTriangles`); `btOptimizedBvh::updateBvhNodes` goes from 20 % to 94 %,
+`performRaycast` / `performConvexcast` from 47 % to 75 %, `InternalProcessAllTriangles`
+from 56 % to 70 % (left: order of `mtlo` and loads, registers). The exact retail
+pattern is not known, only this behaviour; `btCollisionDispatcher::
+freeCollisionAlgorithm` (0x13BD1C) has the `madd` but another register allocation
+(the argument copied to `$a3`). Adopted in build `4.0.4a`: `tools/gcc/madd-4.0.4.diff`.
+
 **Host word size** (2026-11-25): no effect. `HOST_WIDE_INT` is 64 bits on any host
 for a MIPS target (`need_64bit_hwint=yes` in `config.gcc`), and `cc1` / `cc1plus`
 built as 32-bit programs (i686 Linux, static) give the same 546 identical Bullet
