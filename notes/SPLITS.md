@@ -73,16 +73,23 @@ The upstream sources compiled with the stock PSPDEV GCC 4.0.2 at `-O2 -G0`, with
 ### Bullet files
 
 Trunk 66861ad3340a (2.71) with the game's `LinearMath` changes (`notes/PROVENANCE.md`),
-compiled with psp-gcc-4.0.4a at `-O3 -G0 -mpreferred-stack-boundary=4
--fno-merge-constants -DNDEBUG` (`notes/COMPILER.md`), found by content in the original.
-A whole C++ file is linked with its pieces at their places: `.text`, its constants
-(`.rodata`), its out-of-line inline functions (`.gnu.linkonce.t.*`, in 0x1BA6D0+),
-its typeinfo, name and vtable (`.gnu.linkonce.r.*`) and its `.eh_frame` block (one CIE
-per object, then its FDEs).
+built as `notes/COMPILER.md` ("Bullet: how its files were built") describes, found by
+content in the original. A whole C++ file is linked with its pieces at their places:
+`.text`; its floats (`.rodata.cst4`) and strings (`.rodata.str1.4`, 0x237xxx); its
+out-of-line inline functions (`.gnu.linkonce.t.*`, in 0x1BA6D0+); its typeinfo, names
+and vtables (`.gnu.linkonce.r.*`, 0x2414xx-0x2436xx); its `.eh_frame` block (one CIE
+per object, then its FDEs) and its `.gcc_except_table`. A `.gnu.linkonce` section
+shared by several files is linked from the first one.
 
 | Range | File | Status |
 |---|---|---|
-| 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical as a whole file; linked from source (constants 0x215B34, `checkCollideWithOverride` 0x1D8540, typeinfo/name/vtable 0x2414A0-0x2414D8, `.eh_frame` 0x2037F4-0x203820) |
+| 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical, linked from source |
+| 0x141410-0x141484 | `btEmptyCollisionAlgorithm.cpp` | identical, linked from source (with `btCollisionAlgorithm`'s vtable, typeinfo and destructors) |
+| 0x1501AC-0x15020C | `btTriangleCallback.cpp` | identical, linked from source |
+| 0x15186C-0x151954 | `btGjkEpaPenetrationDepthSolver.cpp` | identical, linked from source |
+| 0x16AC90-0x16ACC0 | `btCollisionAlgorithm.cpp` | identical, linked from source |
+| 0x16BA14-0x16BF34 | `btBoxBoxCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B40D) |
+| 0x17478C-0x1747EC | `btConcaveShape.cpp` | identical, linked from source |
 
 Gaps not listed (0x19D5E8-0x19DC20, 0x1A2690-0x1A627C, 0x1A9620-0x1AC2A0,
 0x1ACE24-0x1AF818) hold more library code without telling strings; 0x1AC080, in the
