@@ -228,6 +228,33 @@ pattern is not known, only this behaviour; `btCollisionDispatcher::
 freeCollisionAlgorithm` (0x13BD1C) has the `madd` but another register allocation
 (the argument copied to `$a3`). Adopted in build `4.0.4a`: `tools/gcc/madd-4.0.4.diff`.
 
+**GCSE hash order** (2026-11-25), not adopted. In `btPolyhedralConvexShape::getAabb`
+(0x14E9D0) the only difference is that the loads at `trans+16` and `trans+32` get
+`$a0` / `$a1` swapped. Their pseudos are made by GCSE PRE (`pre_delete`, `gcse.c`),
+which walks the expression hash table bucket by bucket; global allocation then breaks
+the tie by allocno number, so the first one made gets `$a0`. Ours makes `+16` first
+(bucket 2 of 37, `+32` in bucket 18: `hash_rtx` puts them 16 apart whatever the
+table), the game `+32`. Tried on all of Bullet (with the inline functions, base
+1168/1695):
+
+- table size (`n_insns / 4`, made odd) changed to `/ 2`: +3 -2; `/ 3`: +2 -2; `/ 5`:
+  +2 -0; `/ 6`: +4 -2; `/ 8`: +2 -2; `/ 4` not made odd: +4 -0;
+- one size forced for every function, 11 to 260: 17 functions depend on it; each
+  of the family (a) functions has the game's code for some sizes (the getAabb above
+  for 39 of the 250), but no formula of `n_insns` gives all of them (best 11 of 13
+  with a known insn count; the default 4);
+- a constant added to every hash, 0 to 399: best +7 -8 (both getAabb,
+  `btCompoundShape::getAabb`, `btPoint2PointConstraint::buildJacobian`,
+  `resolveSingleBilateral`, `btOptimizedBvh::refitPartial`, a `NodeTriangleCallback`,
+  for three `btContactConstraint` solvers, three `btGjkEpa2` functions,
+  `btOptimizedBvh::build` and `btPoint2PointConstraint::solveConstraint`).
+
+So the bucket order decides these functions, but the retail hash values differ
+expression by expression, not by a table size or an offset. Hypothesis: other
+register numbers (`hash_rtx` adds the register number of a `REG`), that is, another
+pseudo numbering before GCSE. The `/ 4` not odd variant (+4 -0) is a fit, not
+evidence, and is not adopted.
+
 **Host word size** (2026-11-25): no effect. `HOST_WIDE_INT` is 64 bits on any host
 for a MIPS target (`need_64bit_hwint=yes` in `config.gcc`), and `cc1` / `cc1plus`
 built as 32-bit programs (i686 Linux, static) give the same 546 identical Bullet
