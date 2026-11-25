@@ -71,10 +71,12 @@ segments:
       - [0x141544, asm, text_00141484]
       - [0x15026C, cpp, bullet/BulletCollision/CollisionShapes/btTriangleCallback]
       - [0x1502CC, asm, text_0015020C]
+      - [0x1518FC, cpp, bullet/BulletCollision/NarrowPhaseCollision/btConvexCast]
       - [0x15192C, cpp, bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver]
       - [0x151A14, asm, text_00151954]
       - [0x16AD50, cpp, bullet/BulletCollision/BroadphaseCollision/btCollisionAlgorithm]
-      - [0x16AD80, asm, text_0016ACC0]
+      - [0x16AD80, cpp, bullet/BulletCollision/BroadphaseCollision/btDispatcher]
+      - [0x16ADB0, asm, text_0016ACF0]
       - [0x16BAD4, cpp, bullet/BulletCollision/CollisionDispatch/btBoxBoxCollisionAlgorithm]
       - [0x16BFF4, asm, text_0016BF34]
       - [0x17484C, cpp, bullet/BulletCollision/CollisionShapes/btConcaveShape]
@@ -168,10 +170,17 @@ segments:
       - { start: 0x242B48, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btTriangleCallback, linker_section: .gnu.linkonce.r._ZTV18btTriangleCallback }
       - { start: 0x242B60, type: .rodata, name: bullet/BulletCollision/CollisionShapes/btTriangleCallback, linker_section: .gnu.linkonce.r._ZTV31btInternalTriangleIndexCallback }
       - [0x242B78, rodata, rodata_00242AB8]
+      - { start: 0x242D30, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btConvexCast, linker_section: .gnu.linkonce.r._ZTI12btConvexCast }
+      - { start: 0x242D38, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btConvexCast, linker_section: .gnu.linkonce.r._ZTS12btConvexCast }
+      - { start: 0x242D48, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btConvexCast, linker_section: .gnu.linkonce.r._ZTV12btConvexCast }
       - { start: 0x242D60, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .gnu.linkonce.r._ZTI30btGjkEpaPenetrationDepthSolver }
       - { start: 0x242D6C, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .gnu.linkonce.r._ZTS30btGjkEpaPenetrationDepthSolver }
       - { start: 0x242D90, type: .rodata, name: bullet/BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver, linker_section: .gnu.linkonce.r._ZTV30btGjkEpaPenetrationDepthSolver }
       - [0x242DA8, rodata, rodata_00242CE8]
+      - { start: 0x243360, type: .rodata, name: bullet/BulletCollision/BroadphaseCollision/btDispatcher, linker_section: .gnu.linkonce.r._ZTI12btDispatcher }
+      - { start: 0x243368, type: .rodata, name: bullet/BulletCollision/BroadphaseCollision/btDispatcher, linker_section: .gnu.linkonce.r._ZTS12btDispatcher }
+      - { start: 0x243378, type: .rodata, name: bullet/BulletCollision/BroadphaseCollision/btDispatcher, linker_section: .gnu.linkonce.r._ZTV12btDispatcher }
+      - [0x2433B8, rodata, rodata_002432F8]
       - { start: 0x2433F8, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btBoxBoxCollisionAlgorithm, linker_section: .gnu.linkonce.r._ZTI26btBoxBoxCollisionAlgorithm }
       - { start: 0x243404, type: .rodata, name: bullet/BulletCollision/CollisionDispatch/btBoxBoxCollisionAlgorithm, linker_section: .gnu.linkonce.r._ZTS26btBoxBoxCollisionAlgorithm }
       - [0x243424, rodata, rodata_00243364]

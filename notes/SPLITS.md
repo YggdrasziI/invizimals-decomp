@@ -86,8 +86,10 @@ shared by several files is linked from the first one.
 | 0x13C7BC-0x13C970 | `btCollisionObject.cpp` | identical, linked from source |
 | 0x141410-0x141484 | `btEmptyCollisionAlgorithm.cpp` | identical, linked from source (with `btCollisionAlgorithm`'s vtable, typeinfo and destructors) |
 | 0x1501AC-0x15020C | `btTriangleCallback.cpp` | identical, linked from source |
+| 0x15183C-0x15186C | `btConvexCast.cpp` | identical, linked from source |
 | 0x15186C-0x151954 | `btGjkEpaPenetrationDepthSolver.cpp` | identical, linked from source |
 | 0x16AC90-0x16ACC0 | `btCollisionAlgorithm.cpp` | identical, linked from source |
+| 0x16ACC0-0x16ACF0 | `btDispatcher.cpp` | identical, linked from source |
 | 0x16BA14-0x16BF34 | `btBoxBoxCollisionAlgorithm.cpp` | identical, linked from source (`.gcc_except_table` 0x20B40D) |
 | 0x17478C-0x1747EC | `btConcaveShape.cpp` | identical, linked from source |
 
