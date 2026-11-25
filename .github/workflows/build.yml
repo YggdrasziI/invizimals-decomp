@@ -52,7 +52,7 @@ jobs:
         run: pip install -r tools/requirements.txt
 
       # The compilers of the C units ([compiler] of decomp.toml): GCC 4.0.4 (build
-      # 4.0.4c, as probe-gcc4.yml, then 4.0.4a = 4.0.4c + tools/gcc/block-move-4.0.4.diff) for the game and the stock PSPDEV GCC 4.0.2 (build
+      # 4.0.4c, as probe-gcc4.yml, then 4.0.4a = 4.0.4c + the diffs of tools/gcc) for the game and the stock PSPDEV GCC 4.0.2 (build
       # 4.0.2h) for src/expat, built from GNU sources by the LBP-PSP-Decomp kit in
       # $HOME/lbp-gcc4. Its assembler is the Sony binutils 2.14 one of the decomp.me
       # psp-gcc-1.3.1 archive, a 32-bit program, in $HOME/hst-gcc where the kit's

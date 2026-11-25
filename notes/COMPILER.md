@@ -125,6 +125,21 @@ same as with `4.0.4c`. Adopted 2026-11-24 (owner's decision) as the `[compiler]`
 `decomp.toml`: `tools/gcc/block-move-4.0.4.diff` (GPL-3.0-or-later, GCC code), applied
 to the kit's `4.0.4c` work tree by `tools/gcc/build_404a.sh` (local and CI).
 
+Float conversion latency (2026-11-25). In the kit's Allegrex scheduling description
+(`config/mips/allegrex-sched.md`: loads 3, stores holding the memory unit) the other
+types keep `generic.md`'s latencies, `fcvt` (`trunc.w.s`, `cvt.s.w`...) 1. Bullet's
+`btQuantizedBvh::reportAabbOverlappingNodex` (0x14B804, 451 instructions) differs from
+the original only in two places, each a `trunc.w.s` followed by its `mfc1`: the
+original puts an independent load between them (`trunc.w.s`, `lwc1`, `mfc1`;
+`trunc.w.s`, `lw`, `mfc1`), `4.0.4c` issues the `mfc1` right after. With an
+`fcvt` latency of 2 the function is identical; 3 gives the same code on every Bullet
+file. Sweep of all Bullet files with the build method below: 442 functions found
+identical before, 443 with it, none lost. No probe function has a float conversion.
+Tried without effect on the other near misses: `fadd`, `fmul` and `call` latencies
+(shorter ones lose functions), scheduler options (`-fno-sched-*`, `-fsched2-use-*`).
+Adopted in build `4.0.4a`: `tools/gcc/allegrex-fcvt-4.0.4.diff`, applied by
+`tools/gcc/build_404a.sh` after the block-copy diff.
+
 ### Adopted
 
 2026-11-24: `4.0.4c` at `-O2 -G0` is the `[compiler]` of `decomp.toml`. Built in WSL

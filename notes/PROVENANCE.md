@@ -95,3 +95,11 @@ C1 (`lbp-copy-order-asm-slot-4.0.4.diff`, GPL-3.0-or-later,
 `754764d14759`), and its run-time alignment test follows GCC 3.3.6's
 `expand_block_move` (GPL-2.0-or-later). Neither GCC nor the kit is copied into the
 repository; `tools/gcc/build_404a.sh` applies the diff to the kit's work tree.
+
+## GCC change (`tools/gcc/allegrex-fcvt-4.0.4.diff`)
+
+A diff of `gcc/config/mips/allegrex-sched.md`, a file the LBP-PSP-Decomp kit copies
+into GCC 4.0.4 (`toolchain/gcc4/patches/allegrex-sched.md`, GPL-3.0-or-later, commit
+`754764d14759`): written for this project, marked GPL-3.0-or-later, it appends one
+reservation. The kit is not copied into the repository; `tools/gcc/build_404a.sh` applies the diff to the
+kit's work tree.
