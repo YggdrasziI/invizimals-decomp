@@ -1,3 +1,6 @@
+/* Altered source version, not the original Bullet file: changed for the build of
+   the game (see notes/PROVENANCE.md). btQuadWordStorage is 16-byte aligned (the declaration commented out upstream is used). */
+
 /*
 Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/
 
@@ -24,8 +27,8 @@ subject to the following restrictions:
 
 ///The btQuadWordStorage class is base class for btVector3 and btQuaternion. 
 ///Some issues under PS3 Linux with IBM 2.1 SDK, gcc compiler prevent from using aligned quadword. todo: look into this
-///ATTRIBUTE_ALIGNED16(class) btQuadWordStorage
-class btQuadWordStorage
+ATTRIBUTE_ALIGNED16(class) btQuadWordStorage
+//class btQuadWordStorage
 {
 protected:
 

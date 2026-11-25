@@ -37,6 +37,12 @@ unaligned_words = true
 linux = "~/lbp-gcc4/psp-gcc-4.0.2h/bin/psp-gcc"
 flags = "-O2 -G0 -DHAVE_EXPAT_CONFIG_H -nostdinc -Iinclude/libc -Iinclude/expat"
 
+# Bullet (src/bullet, trunk 66861ad3340a with the marked LinearMath changes): the game's
+# compiler at -O3, without merged constants, NDEBUG (notes/COMPILER.md)
+[compiler.dirs."src/bullet"]
+linux = "~/lbp-gcc4/psp-gcc-4.0.4a/bin/psp-gcc"
+flags = "-O3 -G0 -mpreferred-stack-boundary=4 -fno-merge-constants -DNDEBUG -nostdinc -Iinclude/cxx -Iinclude/libc -Isrc/bullet"
+
 # tools/common/try_unit.py: the code not split into units is all in text.s
 [try]
 compile = "{cc} -c {flags} -Iinclude -Isrc -o {obj} {src}"

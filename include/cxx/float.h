@@ -1,0 +1,6 @@
+// Minimal declarations for building Bullet (C++) without a C library; written for this project.
+#define FLT_MAX 3.40282347e+38F
+#define FLT_MIN 1.17549435e-38F
+#define FLT_EPSILON 1.19209290e-7F
+#define DBL_MAX 1.7976931348623157e+308
+#define DBL_EPSILON 2.2204460492503131e-16

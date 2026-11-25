@@ -1,3 +1,6 @@
+/* Altered source version, not the original Bullet file: changed for the build of
+   the game (see notes/PROVENANCE.md). ATTRIBUTE_ALIGNED16 aligns to 16 bytes on this target. */
+
 /*
 Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/
 
@@ -111,7 +114,7 @@ inline int	btGetVersion()
 	//non-windows systems
 
 		#define SIMD_FORCE_INLINE inline
-		#define ATTRIBUTE_ALIGNED16(a) a
+		#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
 		#define ATTRIBUTE_ALIGNED128(a) a
 		#ifndef assert
 		#include <assert.h>

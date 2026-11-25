@@ -55,8 +55,21 @@ of `src/` (`btBulletCollisionCommon.h`, `btBulletDynamicsCommon.h`, `Bullet-C-Ap
 and `BulletLicense.txt` of the GitHub archive of that commit
 (`codeload.github.com/bulletphysics/bullet3/tar.gz/66861ad3340a`, SHA-256
 `0ad18ad474832805d795e958980cfcae55aec3e704a85cb73254daf93ec09afb`). License: zlib
-(`src/bullet/BulletLicense.txt`). Files changed for the game's build are marked as
-such at their top and listed here:
+(`src/bullet/BulletLicense.txt`); line endings normalized to LF. Files changed for the
+game's build are marked as such at their top (zlib license, clause 2) and listed here;
+each change is a reconstruction from the game's code, not a copy of other code:
+
+- `LinearMath/btQuadWord.h`: `btQuadWordStorage` declared `ATTRIBUTE_ALIGNED16` (the
+  upstream declaration, commented out there): the game's vectors are 16-byte aligned;
+- `LinearMath/btScalar.h`: `ATTRIBUTE_ALIGNED16` aligns to 16 bytes for this target;
+- `LinearMath/btVector3.h`: `btVector3::cross` as the game's VFPU block (79 times in
+  the Bullet code, first at 0x152738);
+- `LinearMath/btMatrix3x3.h`: `setRotation` as the game's VFPU block (first at
+  0x13FCC8; no division by the squared length);
+- `LinearMath/btQuaternion.h`: `operator*=` and `operator*(q1, q2)` with `vqmul.q`
+  (first at 0x157F00).
+
+Written for this project: `include/cxx/` (minimal C and C++ declarations for Bullet).
 
 ## GCC 4.0.x build kit
 

@@ -1,3 +1,6 @@
+/* Altered source version, not the original Bullet file: changed for the build of
+   the game (see notes/PROVENANCE.md). btMatrix3x3::setRotation uses the VFPU, for a unit quaternion (rebuilt from the game's code). */
+
 /*
 Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/
 
@@ -110,16 +113,33 @@ class btMatrix3x3 {
   
 		void setRotation(const btQuaternion& q) 
 		{
-			btScalar d = q.length2();
-			btFullAssert(d != btScalar(0.0));
-			btScalar s = btScalar(2.0) / d;
-			btScalar xs = q.x() * s,   ys = q.y() * s,   zs = q.z() * s;
-			btScalar wx = q.w() * xs,  wy = q.w() * ys,  wz = q.w() * zs;
-			btScalar xx = q.x() * xs,  xy = q.x() * ys,  xz = q.x() * zs;
-			btScalar yy = q.y() * ys,  yz = q.y() * zs,  zz = q.z() * zs;
-			setValue(btScalar(1.0) - (yy + zz), xy - wz, xz + wy,
-					 xy + wz, btScalar(1.0) - (xx + zz), yz - wx,
-					 xz - wy, yz + wx, btScalar(1.0) - (xx + yy));
+			__asm__ volatile (
+			"lv.q C000, %3\n"
+			"vmul.q C010, C000, C000\n"
+			"vcrs.t C020, C000, C000\n"
+			"vpfxs X, Y, Z, 1\n"
+			"vpfxt W, W, W, 2\n"
+			"vmul.q C030, C000, C000\n"
+			"vpfxs 0, Z, Y, 0\n"
+			"vpfxt 0, Z, -Y, 0\n"
+			"vadd.q C100, C020, C030\n"
+			"vadd.s S100, S011, S012\n"
+			"vpfxs Z, 0, X, 0\n"
+			"vpfxt -Z, 0, X, 0\n"
+			"vadd.q C110, C020, C030\n"
+			"vadd.s S111, S010, S012\n"
+			"vpfxs Y, X, 0, 0\n"
+			"vpfxt Y, -X, 0, 0\n"
+			"vadd.q C120, C020, C030\n"
+			"vadd.s S122, S010, S011\n"
+			"vmscl.t M100, M100, S033\n"
+			"vocp.s S100, S100\n"
+			"vocp.s S111, S111\n"
+			"vocp.s S122, S122\n"
+			"sv.q R100, %0\n"
+			"sv.q R101, %1\n"
+			"sv.q R102, %2\n"
+			: "=m"(m_el[0]), "=m"(m_el[1]), "=m"(m_el[2]) : "m"(q));
 		}
 		
 

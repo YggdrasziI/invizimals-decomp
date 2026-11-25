@@ -1,3 +1,6 @@
+/* Altered source version, not the original Bullet file: changed for the build of
+   the game (see notes/PROVENANCE.md). btVector3::cross uses the VFPU (rebuilt from the game's code). */
+
 /*
 Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/
 
@@ -117,10 +120,15 @@ public:
 
 	SIMD_FORCE_INLINE btVector3 cross(const btVector3& v) const
 	{
-		return btVector3(
-			m_y * v.z() - m_z * v.y(),
-			m_z * v.x() - m_x * v.z(),
-			m_x * v.y() - m_y * v.x());
+		btVector3 r;
+		__asm__ volatile (
+			"vmzero.q M000\n"
+			"lv.q C010, %1\n"
+			"lv.q C020, %2\n"
+			"vcrsp.t C000, C010, C020\n"
+			"sv.q C000, %0\n"
+			: "=m"(r) : "m"(*this), "m"(v));
+		return r;
 	}
 
 	SIMD_FORCE_INLINE btScalar triple(const btVector3& v1, const btVector3& v2) const

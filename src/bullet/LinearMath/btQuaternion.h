@@ -1,3 +1,6 @@
+/* Altered source version, not the original Bullet file: changed for the build of
+   the game (see notes/PROVENANCE.md). The quaternion products use the VFPU (vqmul.q, rebuilt from the game's code). */
+
 /*
 Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/
 
@@ -88,10 +91,12 @@ public:
 
 	btQuaternion& operator*=(const btQuaternion& q)
 	{
-		setValue(m_unusedW * q.x() + m_x * q.m_unusedW + m_y * q.z() - m_z * q.y(),
-			m_unusedW * q.y() + m_y * q.m_unusedW + m_z * q.x() - m_x * q.z(),
-			m_unusedW * q.z() + m_z * q.m_unusedW + m_x * q.y() - m_y * q.x(),
-			m_unusedW * q.m_unusedW - m_x * q.x() - m_y * q.y() - m_z * q.z());
+		__asm__ volatile (
+			"lv.q C010, %0\n"
+			"lv.q C020, %1\n"
+			"vqmul.q C000, C010, C020\n"
+			"sv.q C000, %0\n"
+			: "+m"(*this) : "m"(q));
 		return *this;
 	}
 
@@ -229,10 +234,14 @@ operator-(const btQuaternion& q)
 
 SIMD_FORCE_INLINE btQuaternion
 operator*(const btQuaternion& q1, const btQuaternion& q2) {
-	return btQuaternion(q1.w() * q2.x() + q1.x() * q2.w() + q1.y() * q2.z() - q1.z() * q2.y(),
-		q1.w() * q2.y() + q1.y() * q2.w() + q1.z() * q2.x() - q1.x() * q2.z(),
-		q1.w() * q2.z() + q1.z() * q2.w() + q1.x() * q2.y() - q1.y() * q2.x(),
-		q1.w() * q2.w() - q1.x() * q2.x() - q1.y() * q2.y() - q1.z() * q2.z()); 
+	btQuaternion r;
+	__asm__ volatile (
+		"lv.q C010, %1\n"
+		"lv.q C020, %2\n"
+		"vqmul.q C000, C010, C020\n"
+		"sv.q C000, %0\n"
+		: "=m"(r) : "m"(q1), "m"(q2));
+	return r;
 }
 
 SIMD_FORCE_INLINE btQuaternion
