@@ -6,12 +6,13 @@ with `patch -p1` in gcc-4.0.4/ after the kit's diffs.
 In config/mips/allegrex-sched.md, the kit's Allegrex scheduling description, six
 instruction types get their own latency instead of generic.md's: float conversions,
 moves, comparisons and single-precision multiplications 4 (like generic.md's
-additions), mfc1/mtc1 3, integer multiplications 5. Each value is the one that gives
+additions), mfc1/mtc1 3, integer multiplications 5, single-precision divisions and
+square roots 28. Each value is the one that gives
 the most functions of the game's Bullet library byte for byte, with none lost.
 The kit's context is GPL-3.0-or-later.
 --- a/gcc/config/mips/allegrex-sched.md
 +++ b/gcc/config/mips/allegrex-sched.md
-@@ -7,3 +7,29 @@
+@@ -7,3 +7,34 @@
  (define_insn_reservation "alg_store" 1
    (and (eq_attr "cpu" "allegrex") (eq_attr "type" "store,fpstore,fpidxstore"))
    "alu+alg_mem,alg_mem*2")
@@ -40,4 +41,9 @@ The kit's context is GPL-3.0-or-later.
 +;; integer multiplications: generic 17
 +(define_insn_reservation "alg_imul" 5
 +  (and (eq_attr "cpu" "allegrex") (eq_attr "type" "imul,imadd"))
++  "alu")
++;; single-precision div.s and sqrt.s: generic 23 and 54
++(define_insn_reservation "alg_fdiv_fsqrt_single" 28
++  (and (eq_attr "cpu" "allegrex")
++       (and (eq_attr "type" "fdiv,frdiv,fsqrt,frsqrt") (eq_attr "mode" "SF")))
 +  "alu")

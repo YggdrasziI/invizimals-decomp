@@ -144,6 +144,7 @@ independent load between each `trunc.w.s` and its `mfc1`).
 | `fcmp` | 3 | 4 | no effect alone; with the three above 507 -> 517; 2: 503; 5, 6: 508 |
 | `fcvt` | 1 | 4 | on top of the others 517 -> 520; 3: 518; 5: 517 |
 | `imul`, `imadd` | 17 | 5 | 505 -> 507 (two `btCapsuleShape` functions); 3, 4: 503; 6, 8, 12: 505 |
+| `fdiv`, `fsqrt`, single precision | 23, 54 | 28 | with the inline functions, 1176 -> 1183 of 1695 (2026-11-25, below) |
 
 All together: **520 identical, none of the 443 lost**. `fadd` stays at 4 (1, 2, 3, 5, 6
 all lose functions): every single-precision operation but the division and the
@@ -164,12 +165,22 @@ the near misses that remain.
 Rescan of 2026-11-25, with the branch cost and host `qsort` below (546 identical):
 every adopted value is still the best (any other value of `fadd`, single `fmul`,
 the moves, `fcmp`, `fcvt`, `xfer`, `imul`, the loads split by kind, `arith`,
-`const`, `slt`, `shift`, `call` loses functions). Open: a single-precision
-`fsqrt` of 18 to 24 (generic: 54) makes `btGjkPairDetector::getClosestPoints`
-(0x151954, 735 instructions) identical, but changes the order around `sqrt.s` in
-three inline functions of `btGjkEpa2.cpp` (0x1DE2C4, 0x1DE9B4, 0x1DF248) that are
-identical with 54; 25 and more keep those and lose the first. No single latency
-fits both: not adopted. `library_sweep.py --inline 1BA6D0 1E3294` scores the inline
+`const`, `slt`, `shift`, `call` loses functions). A single-precision
+`fsqrt` of 18 to 24 alone (generic: 54) makes `btGjkPairDetector::getClosestPoints`
+(0x151954, 735 instructions) identical but loses `gjkepa2_impl::GJK::EncloseOrigin`
+(0x1DDE44), which needs 30 or more. The two ask for different things: in
+`EncloseOrigin` a `div.s` that uses the root waits behind all 18 integer instructions
+of its block (a long `sqrt.s`); in `getClosestPoints` the `c.eq.s` that tests the
+root goes before the `mul.s` that wait for a `div.s` (a `sqrt.s` hardly longer than
+the `div.s`). Both hold when `div.s` is longer too. Scan of both (2026-11-25, with
+the pseudo register numbers below, 1176 of 1695 with the inline functions): 28 and
+28 gives 1183, none lost; 27 or 29 for either, 1179 to 1182; `fdiv` 28 alone 1181;
+26, 30 and 32 lower. Gained: `getClosestPoints`,
+`btConeTwistConstraint::solveConstraint` (scheduling order of `mul.s` / `mtc1`),
+`btSphereBoxCollisionAlgorithm::getSphereDistance`, the `btQuantizedBvh` ray walk,
+`btCollisionWorld::convexSweepTest`, `btCompoundShape::calculateLocalInertia`,
+`resolveSplitPenetrationImpulseCacheFriendly`. Adopted in build `4.0.4a` (one
+reservation of 28 for both, in `tools/gcc/allegrex-sched-4.0.4.diff`). `library_sweep.py --inline 1BA6D0 1E3294` scores the inline
 functions too (1166 identical of 1695 with them, 547 of 994 in `.text` alone): use
 it for any compiler change.
 
